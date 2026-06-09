@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Je'Cole's Bakery - Receipt{% endblock %}
+
+{% block extra_head %}
+    <style>
+h1, h2{
+    text-align: center;
+    font-size: 30px;
+    }
+table{
+    background-color: white;
+    height:250px;
+    width: 500px;
+    margin: 0 auto;
+}
+
+td,th{
+    padding: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <br>
+        <h1>Online Receipt</h1>
+        <table id="customerInfo">
+            <tr>
+                <th colspan="2"><h2>Customer Details</h2></th>
+            </tr>
+            <tr>
+                <td><b>First Name:</b></td>
+                <td>{{ request.user.first_name }}</td>
+            </tr>
+            <tr>
+                <td><b>Last Name:</b></td>
+                <td>{{ request.user.last_name }}</td>
+            </tr>
+            <tr>
+                <td><b>Email:</b></td>
+                <td>{{ request.user.email }}</td>
+            </tr>
+            <tr>
+                <td><b>Contact Number:</b></td>
+                <td>{{ contact_number }}</td>
+            </tr>
+            <tr>
+                <td><b>House Number</b></td>
+                <td>{{ receipt.housenumber }}</td>
+            </tr>
+            <tr>
+                <td><b>Street Name:</b></td>
+                <td>{{ receipt.streetname }}</td>
+            </tr>
+            <tr>
+                <td><b>Barangay:</b></td>
+                <td>{{ receipt.barangay }}</td>
+            </tr>
+            <tr>
+                <td><b>Postal code:</b></td>
+                <td>{{ receipt.postalcode }}</td>
+            </tr>
+            <tr>
+                <td><b>City:</b></td>
+                <td>{{ receipt.city }}</td>
+            </tr>
+        </table>
+<br>
+        <table id="orderInfo">
+            <tr>
+                <th colspan="2"><h2>Order Details</h2></th>
+            </tr>
+            <tr>
+                <th>Item</th>
+                <th>Price</th>
+            </tr>
+            {% if orders %}
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.item_name }}</td>
+                        <td>₱{{ order.item_price }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="2">No order details found.</td></tr>
+            {% endif %}
+            <tr>
+                <td><h3>Total Price: </h3></td>
+                <td>₱{{ receipt.total_price }}</td>
+            </tr>
+        </table>
+    </section>
+{% endblock %}

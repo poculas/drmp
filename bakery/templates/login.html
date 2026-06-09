@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Je'Cole's Bakery - Log in{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="registration">
+            <h1>Log in</h1>
+            <p>New user? <a href="{% url 'signup' %}">Sign up</a> instead</p>
+
+            <form id="login" method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <label for="email"><h4>Email:</h4></label>
+                <input type="email" name="email" id="email" required>
+                <br><br><br>
+                <label for="password"><h4>Password:</h4></label>
+                <input type="password" name="password" id="password" required>
+                <button type="submit" name="login" id="submit"><h3>Log in</h3></button>
+            </form>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Je'Cole's Bakery - Billing Information{% endblock %}
+
+{% block extra_head %}
+    <style>
+        #delivery-info {
+    margin: auto;
+    padding: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.delivery-container {
+    background-color: #fff;
+    border-radius: 15px;
+    margin-top:10%;
+    padding: 30px 40px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+    text-align: center;
+    color: rgb(46, 33, 2);
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.total-container {
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+    color: rgb(46, 33, 2);
+}
+
+.pay-btn {
+    background-color: rgb(121, 65, 28);
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.pay-btn:hover {
+    background-color: rgb(150, 80, 30);
+}
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section id="delivery-info">
+        <div class="delivery-container">
+            <h2>Billing Information</h2>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <form id="delivery" action="{% url 'delivery' %}" method="POST">
+                {% csrf_token %}
+                <label for="house">House/Unit No.:</label>
+                <input type="number" id="house" name="houseNumber" required>
+
+                <label for="street">Street:</label>
+                <input type="text" id="street" name="street" required>
+
+                <label for="barangay">Barangay:</label>
+                <input type="text" id="barangay" name="barangay" required>
+
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" required>
+
+                <label for="postalCode">Postal Code:</label>
+                <input type="number" id="postalCode" pattern="\d*" name="postalCode" required>
+
+                <label for="paymentMethod">Payment Method:</label>
+                <select id="paymentMethod" name="paymentMethod" required>
+                    <option value="" disabled selected>Select a payment method</option>
+                    <option value="Gcash">Gcash</option>
+                    <option value="PayMaya">PayMaya</option>
+                    <option value="BDO">BDO</option>
+                    <option value="Cash on delivery">Cash on delivery</option>
+                </select>
+
+                <div class="total-container">
+                    <p id="cartTotal">TOTAL: ₱{{ total_price }}</p>
+                </div>
+
+                <button type="submit" class="pay-btn" id="payNow" name="payNow">PAY NOW</button>
+            </form>
+        </div>
+    </section>
+{% endblock %}

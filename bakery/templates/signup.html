@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+    <section>
+    <div class="registration">
+        <h1>Sign Up</h1>
+        <p>Already have an account? <a href="{% url 'login' %}">Log in</a> instead</p>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form id="signup" action="{% url 'signup' %}" method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td><label for="Fname"><h4>First Name:</h4></label></td>
+                    <td><input type="text" name="first_name" id="Fname" required></td>
+                </tr>
+                <tr>
+                    <td><label for="Lname"><h4>Last Name:</h4></label></td>
+                    <td><input type="text" name="last_name" id="Lname" required></td>
+                </tr>
+                <tr>
+                    <td><label for="number"><h4>Phone Number:</h4></label></td>
+                    <td><input type="number" name="contactnumber" id="number" maxlength="11" title="Please enter exactly 11 digits." required></td>
+                </tr>
+                <tr>
+                    <td><label for="email"><h4>Email Address:</h4></label></td>
+                    <td><input type="email" name="email" id="email" required></td>
+                </tr>
+                <tr>
+                    <td><label for="pass"><h4>Password:</h4></label></td>
+                    <td><input type="password" name="password" id="pass" required></td>
+                </tr>
+                <tr>
+                    <td><label for="pass2"><h4>Confirm Password:</h4></label></td>
+                    <td><input type="password" name="confirm_password" id="pass2" required></td>
+                </tr>
+            </table>
+            
+            <button type="submit" name="register" id="submit"><h3>Sign Up</h3></button>
+        </form>
+    </div>
+    </section>
+{% endblock %}
