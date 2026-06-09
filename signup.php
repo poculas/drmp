@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+if(!isset($_SESSION['is_logged_in'])){
+    $_SESSION['is_logged_in'] = false;
+}
+
 $conn = mysqli_connect("localhost", "root", "", "user_registration");
 
 if (!$conn) {
@@ -37,11 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
     $passresult = mysqli_query($conn, $checkEmailQuery);
 
     if (mysqli_num_rows($passresult) > 0) {
-        $error_message .= "Error: Email already registered. Please use a different email.\n";
+        $error_message .= "Error: Email already registered. Please use a different email.";
     }
 
     if ($pass !== $confirmpass) {
-        $error_message .= "Error: Passwords do not match. Please enter matching passwords.\n";
+        $error_message .= "Error: Passwords do not match. Please enter matching passwords.";
     }
 
     if (empty($error_message)) {
@@ -67,37 +72,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
-    <link rel="stylesheet" href="style.css">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel ="stylesheet" href="styles.css">
     <link rel="icon" href="images/tab.png">
     <script>
         window.onload = function() {
             <?php if ($signup_successful): ?>
                 alert("Signup successful!");
                 window.location.href = "index.php"; 
-            <?php elseif ($_SESSION['is_logged_in']): ?>
+                <?php elseif (!empty($error_message)): ?>
                 alert("<?php echo addslashes(str_replace("\n", '\\n', $error_message)); ?>");
             <?php endif; ?>
         }
     </script>
 </head>
 <body>
-    <section id="header">
-        <a href="index.php"><img src="images/logoWhite.png" id="logo"></a>
-        <nav>
-            <ul id="navbar">
-                <li><a href="index.php">Menu</a></li>
-                <li><a href="aboutus.html">About Us</a></li>
-                <?php if ($_SESSION['is_logged_in']): ?>
-                    <li>Welcome, <?php echo htmlspecialchars($_SESSION['user_id']); ?></li>
-                    <li><a href="logout.php">Log out</a></li>
-                <?php else: ?>
-                    <li><a class="active" href="login.php">Log in</a></li>
-                <?php endif; ?>
-            </ul>
-        </nav>
-    </section>
+<nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.php"><img src="images/logoWhite.png" alt="Je'Cole's Bakery"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="menu.php">Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="aboutus.php">About Us</a></li>
+                    <?php if ($_SESSION['is_logged_in']): ?>
+                      <li class="nav-item"><a class="nav-link" href="logout.php">Log out</a></li>
+                      <li>Welcome, <?php echo htmlspecialchars($_SESSION['user_id']); ?></li>  
+                    <?php else: ?>
+                    <li class="nav-item"><a class="nav-link" href="login.php">Log in</a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <section>
-    <div class="container">
+    <div class="registration">
         <h1>Sign Up</h1>
         <p>Already have an account? <a href="login.php">Log in</a> instead</p>
 
@@ -133,27 +152,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
         </form>
     </div>
     </section>
-    <footer>
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="login.php">Log in</a>
-                <a href="index.html">Menu</a>
-                <a href="aboutus.html">About us</a>
-            </div>
-
-            <div class="footer-social">
-                <a href="https://www.facebook.com/">Facebook</a>
-                <a href="https://x.com/?lang=en">Twitter</a>
-                <a href="https://www.instagram.com/">Instagram</a>
-            </div>
-
-            <div class="footer-divider"></div>
-
-            <div class="footer-copyright">
-                <p>© 2024, Je'Cole's Bakery Online Quiapo Manila</p>
-                <p>Je'Cole's Bakery Online</p>
+    <footer class="py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                    <li><a href="index.php" class="text-white">Home</a></li>
+                        <li><a href="menu.php" class="text-white">Menu</a></li>
+                        <li><a href="aboutus.php" class="text-white">About us</a></li>
+                        <li><a href="login.php" class="text-white">Log in</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <a href="https://www.facebook.com/" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://twitter.com/" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.instagram.com/" class="text-white"><i class="fab fa-instagram"></i></a>
+                </div>
+                <div class="col-md-4">
+                    <p>© 2024, Je'Cole's Bakery Online Quiapo Manila</p>
+                    <p>Je'Cole's Bakery Online</p>
+                </div>
             </div>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

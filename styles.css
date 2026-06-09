@@ -1,0 +1,104 @@
+/**ALL**/
+body {
+    font-family:'Gill Sans', 'Gill Sans MT', 'Calibri', 'Trebuchet MS', sans-serif;
+    background-image: url("images/LightBg.jpg");
+  }
+  #header {
+    background-color: rgb(46, 33, 2);
+    padding: 1rem;
+  }
+  #logo {
+    height: 50px;
+  }
+  .navbar {
+        background-color: rgb(46, 33, 2);
+        
+    }
+    .navbar-nav{
+      display:flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .navbar-brand img {
+        height: 30px;
+    }
+    .navbar li {
+      list-style: none;
+      color: white;
+  }
+    .navbar li a.active {
+        color: #ff5a5f;
+    }
+  .hero-section {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+  }
+  footer {
+    background-color:rgb(46, 33, 2);
+    color: white;
+    padding: 3rem 0;
+  }
+
+/**LOGIN & SIGNUP**/
+.registration{
+  background-color: rgb(255, 255, 255);
+  border-radius: 10px;
+  max-width: 30%;
+  box-shadow: 0 0 10px black;
+  margin: 5% 5% 5% 35%;
+  padding:30px;
+}
+
+h1, p {
+  padding-bottom: 5%;
+  text-align: center;
+}
+
+#signup table{
+  margin-left: 18%;
+}
+
+#login input {
+  width: 100%;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 2px solid black;
+}
+
+#signup input {
+  width: 100%;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+td{
+  padding:10px;
+
+}
+
+td input{
+  padding:5px;
+
+}
+
+#submit {
+  margin-top: 20%;
+  padding:10px;
+  width: 100%;
+  border-radius: 10px;
+  border-color: rgb(121, 65, 28) ;
+  background-color: rgb(121, 65, 28) ;
+  color:white;   
+}
+#quantity{
+  width: 20%;
+}
+#qty{
+  width: 40%;
+}

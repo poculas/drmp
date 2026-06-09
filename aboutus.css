@@ -163,7 +163,7 @@ padding: 15px;
 border-radius: 8px;
 transition: background-color 0.3s ease-in-out;
 max-width: 50%;
-font-size: 1em; /**/
+font-size: 20px; /**/
 }
 
 .description:hover {
@@ -270,3 +270,4 @@ pointer-events: none;
 {
 animation: contentOut 1.5s linear 1 forwards!important;
 }
+

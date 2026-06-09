@@ -1,139 +1,107 @@
-let openCart = document.querySelector('#openCart');
-let closeCart = document.querySelector('#closeCart');
+let openCartBtn = document.getElementById('openCart');
+let closeCartBtn = document.getElementById('closeCart');
 let body = document.querySelector('body');
-let checkOut = document.querySelector('.checkOut');
+let cartElement = document.querySelector('.cart');
+let checkOut = document.getElementById('checkOut');
 var cart = [];
 var totalPrice = 0.00;
 
 document.addEventListener('DOMContentLoaded', loadCart);
 
+// Function to add item to cart
 function addToCart(name, price) {
-    // Create an item object to send to the server
-    const item = {
-        name: name,
-        price: price
-    };
+    const item = { name: name, price: price };
 
-    // Send the item to the PHP server using AJAX (fetch)
     fetch('add-to-cart.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(item) // Convert the item object to JSON
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message); // Show the server response (e.g., "Item added to cart")
-        loadCart(); // Reload the cart to show updated items
+        alert(data.message);
+        loadCart();
     })
-    .catch(error => {
-        console.error('Error adding item to cart:', error);
-    });
+    .catch(error => console.error('Error adding item to cart:', error));
 }
 
+// Function to remove item from cart
 function removeFromCart(index) {
-    // Send an AJAX request to remove the item from the server session
     fetch('remove-from-cart.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ index: index }) // Send the index of the item to remove
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index: index })
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message); // Show the server response (e.g., "Item removed")
-        loadCart(); // Reload the cart to show updated items
+        alert(data.message);
+        loadCart();
     })
-    .catch(error => {
-        console.error('Error removing item from cart:', error);
-    });
+    .catch(error => console.error('Error removing item from cart:', error));
 }
 
+// Function to load the cart
 function loadCart() {
-    // Fetch the cart items from the server
     fetch('get-cart.php')
         .then(response => response.json())
         .then(data => {
-
-            cart = data.items; // Update the `cart` array with the items fetched from the server
-            
-            // Now, update the cart display
-            var cartItem = document.getElementById('cartItem');
-            var cartPrice = document.getElementById('cartPrice');
-            var cartTotal = document.getElementById('cartTotal');
-
-            cartItem.innerHTML = '';
-            cartPrice.innerHTML = '';
-            totalPrice = 0.00;
-
-            data.items.forEach((item, index) => {
-                const addedItems = document.createElement('li');
-                const bills = document.createElement('li');
-
-                addedItems.textContent = `${item.item_name}`;
-                bills.textContent = '₱' + item.item_price.toFixed(2);
-
-                const removeButton = document.createElement('button');
-                removeButton.textContent = 'Remove';
-                removeButton.onclick = function () {
-                    removeFromCart(index); // You can handle removal logic similarly via AJAX
-                };
-
-                addedItems.appendChild(removeButton);
-                cartItem.appendChild(addedItems);
-                cartPrice.appendChild(bills);
-
-                totalPrice += item.item_price;
-            });
-
-            cartTotal.textContent = '₱' + totalPrice.toFixed(2);
+            cart = data.items;
+            updateCart();
         })
-        .catch(error => {
-            console.error('Error loading cart:', error);
-        });
+        .catch(error => console.error('Error loading cart:', error));
 }
 
-openCart.addEventListener('click', ()=>{
-    body.classList.add('active');
+// Function to update the cart display
+function updateCart() {
+    const cartItemsElement = document.getElementById('cartItems');
+    const cartTotalElement = document.getElementById('cartTotal');
+    let total = 0;
+
+    cartItemsElement.innerHTML = '';
+
+    cart.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.item_name}</td>
+            <td>₱ ${item.item_price.toFixed(2)}</td>
+            <td></td>
+            <td><button onclick="removeFromCart(${index})">X</button></td>
+        `;
+        cartItemsElement.appendChild(row);
+        total += item.item_price;
+    });
+
+    cartTotalElement.textContent = `₱ ${total.toFixed(2)}`;
+}
+
+// Event listeners for opening and closing cart
+openCartBtn.addEventListener('click', () => {
+    cartElement.classList.add('open');
 });
 
-closeCart.addEventListener('click', ()=>{
-    body.classList.remove('active');
+closeCartBtn.addEventListener('click', () => {
+    cartElement.classList.remove('open');
 });
 
+// Checkout function
 checkOut.addEventListener('click', () => {
     if (cart.length === 0) {
         alert('You need to add an item first!');
     } else {
-        // Send the cart data to the server using fetch (AJAX)
         fetch('checkout.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                cart: cart, // Send the cart items
-                totalPrice: totalPrice // Send the total price
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cart: cart, totalPrice: totalPrice })
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
+            
         })
         .then(data => {
-            if (data.success) {
-                // If checkout is successful, redirect to the delivery page
-                window.location.href = 'delivery.php';
-            } else {
-                alert('Checkout failed: ' + data.message);
-            }
+            if (data.success) window.location.href = 'delivery.php';
+            else alert('Checkout failed: ' + data.message);
         })
-        .catch(error => {
-            console.error('Error during checkout:', error);
-        });
+        .catch(error => console.error('Error during checkout:', error));
     }
 });
