@@ -19,30 +19,41 @@
 
         <form id="signup" action="{% url 'signup' %}" method="POST">
             {% csrf_token %}
-            <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                    <label for="Fname" style="width: 150px; text-align: right;"><h4>First Name:</h4></label>
-                    <input type="text" name="first_name" id="Fname" required style="flex: 1;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div>
+                    <label for="Fname" style="display: block; margin-bottom: 2px;"><h4>First Name:</h4></label>
+                    <input type="text" name="first_name" id="Fname" required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                    <label for="Lname" style="width: 150px; text-align: right;"><h4>Last Name:</h4></label>
-                    <input type="text" name="last_name" id="Lname" required style="flex: 1;">
+                <div>
+                    <label for="Lname" style="display: block; margin-bottom: 2px;"><h4>Last Name:</h4></label>
+                    <input type="text" name="last_name" id="Lname" required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                    <label for="number" style="width: 150px; text-align: right;"><h4>Phone Number:</h4></label>
-                    <input type="number" name="contactnumber" id="number" maxlength="11" title="Please enter exactly 11 digits." required style="flex: 1;">
+                <div>
+                    <label for="number" style="display: block; margin-bottom: 2px;"><h4>Phone Number:</h4></label>
+                    <input type="number" name="contactnumber" id="number" maxlength="11" title="Please enter exactly 11 digits." required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                    <label for="email" style="width: 150px; text-align: right;"><h4>Email Address:</h4></label>
-                    <input type="email" name="email" id="email" required style="flex: 1;">
+                <div>
+                    <label for="email" style="display: block; margin-bottom: 2px;"><h4>Email Address:</h4></label>
+                    <input type="email" name="email" id="email" required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                    <label for="pass" style="width: 150px; text-align: right;"><h4>Password:</h4></label>
-                    <input type="password" name="password" id="pass" required style="flex: 1;">
+                <div>
+                    <label for="pass" style="display: block; margin-bottom: 2px;"><h4>Password:</h4></label>
+                    <input type="password" name="password" id="pass" required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;" oninput="checkPasswordRequirements()">
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                    <label for="pass2" style="width: 150px; text-align: right;"><h4>Confirm Password:</h4></label>
-                    <input type="password" name="confirm_password" id="pass2" required style="flex: 1;">
+                <div id="password-requirements" style="font-size: 0.75rem; line-height: 1.3; margin-top: 3px; margin-bottom: 5px; color: #666;">
+                    <p style="margin: 0; font-weight: 500;">Password must contain:</p>
+                    <p id="req-length" style="margin: 1px 0; color: #999;">✗ 8+ characters</p>
+                    <p id="req-uppercase" style="margin: 1px 0; color: #999;">✗ Uppercase letter</p>
+                    <p id="req-lowercase" style="margin: 1px 0; color: #999;">✗ Lowercase letter</p>
+                    <p id="req-number" style="margin: 1px 0; color: #999;">✗ Number</p>
+                    <p id="req-special" style="margin: 1px 0; color: #999;">✗ Special character</p>
+                </div>
+                <div style="margin-top: 5px;">
+                    <label for="pass2" style="display: block; margin-bottom: 2px;"><h4>Confirm Password:</h4></label>
+                    <input type="password" name="confirm_password" id="pass2" required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;" oninput="checkPasswordMatch()">
+                </div>
+                <div id="password-match" style="font-size: 0.75rem; margin-top: 3px; display: none;">
+                    <p id="req-match" style="margin: 0; color: #dc3545;">✗ Passwords do not match</p>
                 </div>
             </div>
             
@@ -58,4 +69,77 @@
         </div>
     </div>
     </section>
+
+<script>
+function checkPasswordRequirements() {
+    const password = document.getElementById('pass').value;
+    
+    // Check length
+    const lengthReq = document.getElementById('req-length');
+    if (password.length >= 8) {
+        lengthReq.style.color = '#28a745';
+        lengthReq.innerHTML = '✓ 8+ characters';
+    } else {
+        lengthReq.style.color = '#999';
+        lengthReq.innerHTML = '✗ 8+ characters';
+    }
+    
+    // Check uppercase
+    const uppercaseReq = document.getElementById('req-uppercase');
+    if (/[A-Z]/.test(password)) {
+        uppercaseReq.style.color = '#28a745';
+        uppercaseReq.innerHTML = '✓ Uppercase letter';
+    } else {
+        uppercaseReq.style.color = '#999';
+        uppercaseReq.innerHTML = '✗ Uppercase letter';
+    }
+    
+    // Check lowercase
+    const lowercaseReq = document.getElementById('req-lowercase');
+    if (/[a-z]/.test(password)) {
+        lowercaseReq.style.color = '#28a745';
+        lowercaseReq.innerHTML = '✓ Lowercase letter';
+    } else {
+        lowercaseReq.style.color = '#999';
+        lowercaseReq.innerHTML = '✗ Lowercase letter';
+    }
+    
+    // Check number
+    const numberReq = document.getElementById('req-number');
+    if (/[0-9]/.test(password)) {
+        numberReq.style.color = '#28a745';
+        numberReq.innerHTML = '✓ Number';
+    } else {
+        numberReq.style.color = '#999';
+        numberReq.innerHTML = '✗ Number';
+    }
+    
+    // Check special character
+    const specialReq = document.getElementById('req-special');
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        specialReq.style.color = '#28a745';
+        specialReq.innerHTML = '✓ Special character';
+    } else {
+        specialReq.style.color = '#999';
+        specialReq.innerHTML = '✗ Special character';
+    }
+}
+
+function checkPasswordMatch() {
+    const password = document.getElementById('pass').value;
+    const confirmPassword = document.getElementById('pass2').value;
+    const matchReq = document.getElementById('req-match');
+    const matchDiv = document.getElementById('password-match');
+    
+    if (confirmPassword === '') {
+        matchDiv.style.display = 'none';
+    } else if (password === confirmPassword) {
+        matchDiv.style.display = 'none';
+    } else {
+        matchDiv.style.display = 'block';
+        matchReq.style.color = 'red';
+        matchReq.innerHTML = '❌ Passwords do not match';
+    }
+}
+</script>
 {% endblock %}
