@@ -1,157 +1,161 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Je'Cole's Bakery - About Us{% endblock %}
+{% block title %}Dough Re Mi Patisserie - About Us{% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'aboutus.css' %}">
+    <style>
+        .hero-section {
+            position: relative;
+            height: 60vh;
+            overflow: hidden;
+        }
+        .hero-section video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(0, 0, 0, 0.6),
+                rgba(0, 0, 0, 0.2)
+            );
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .hero-content p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #8b4513;
+        }
+        .about-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 3rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 3rem;
+        }
+        .btn-custom {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <video autoplay loop muted plays-inline>
-        <source src="{% static 'media/bread.mp4' %}" type="video/mp4">
-    </video>
-    <div class="slider">
-        <div class="list">
-            <div class="item">
-                <div class="content">
-                    <div class="title">JeCole's</div>
-                    <div class="type">Bakery</div>
-                    <div class="description">
-                        Welcome to our online bakery! a convenient platform where fresh, delicious breada
+    <div class="hero-section">
+        <video autoplay loop muted plays-inline>
+            <source src="{% static 'media/bread.mp4' %}" type="video/mp4">
+        </video>
+        <div class="hero-content">
+            <h1>About Dough Re Mi Patisserie</h1>
+            <p>Experience the art of French baking</p>
+        </div>
+    </div>
+
+    <main class="container my-5">
+        <section class="about-section">
+            <h2 class="section-title">Our Story</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        Welcome to our online bakery! A convenient platform where fresh, delicious bread
                         is just a few clicks away! Our project aims to make it easier for customers to enjoy high-quality,
                         artisan bread without leaving the comfort of their homes. With a wide variety of bread options to
                         choose from, our website allows users to browse, order, and have their favorite loaves delivered
-                        right to their doorstep. Founded in 2024, Jecole's Bakery began with a vision to bring the authentic 
+                        right to their doorstep.
+                    </p>
+                    <p>
+                        Founded in 2024, Dough Re Mi Patisserie began with a vision to bring the authentic 
                         flavors of French pastry to Manila, Philippines. Drawing inspiration from the rich baking traditions 
                         of France, the bakery was established to introduce Filipinos to exquisite breads, pastries, and desserts. 
-                        With a focus on quality ingredients and traditional techniques, Jecole's Bakery quickly gained a reputation 
+                        With a focus on quality ingredients and traditional techniques, Dough Re Mi Patisserie quickly gained a reputation 
                         for offering a taste of France in the heart of Manila, becoming a destination for those seeking artisanal 
                         baked goods with a French flair.
-                    </div>
+                    </p>
                 </div>
             </div>
-            <div class="item">
-                <div class="content">
-                    <div class="title">About our</div>
-                    <div class="type">Breads</div>
-                        <div class="description">
-                            Jecole's Bakery, brings the timeless elegance of French baking to your table.a
-                            Specializing in classic French breads, we offer a selection that showcases the rich, flavorful
-                            tradition of French cuisine. From the perfect baguette to artisanal loaves, each bread is crafted
-                            with passion and precision to bring you an authentic taste of France in every bite. 
-                            Jecole's French pastries offers a sensory experience that begins with their delicate, golden-brown
-                            crusts and ends with rich, flavorful fillings. Each bite is a symphony of textures—light and flaky 
-                            layers that melt in your mouth, often giving way to smooth creams or rich chocolate centers. The buttery, 
-                            slightly sweet aroma entices the senses, while the balanced flavors of almond, vanilla, or fruit add a
-                            touch of sophistication. Whether you're enjoying a croissant, éclair, or tart, these pastries deliver a 
-                            perfect blend of crispiness and softness, making every bite a luxurious treat. At Jecole's Bakery, we
-                            believe that every loaf tells a story, and we are excited to share ours with you.
-                       </div>                  
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <div class="title">JeCole's</div>
-                        <div class="type">Developers</div>
-                        <div class="description">
-                            Jeremy Dimasacat -
-                            The team behind the Jecole’s Bakery website is a dynamic group of talented
-                            developers who have worked to bring the charm of our bakery into the digital world. With a
-                            shared passion for both technology and the art of baking, they’ve crafted a user-friendly, visually
-                            appealing platform that captures the essence of our French-inspired creations. Now, Jecole’s
-                            Bakery is just a click away, bringing the aroma of freshly baked bread into your home from
-                            wherever you are.
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <div class="title">JeCole's</div>
-                        <div class="type">Developers</div>
-                        <div class="description">
-                            Jay Bhie Bite - The team behind the Jecole’s Bakery website is a dynamic group
-                            of talented developers who have worked to bring the charm of our bakery into the digital world.
-                            With a shared passion for both technology and the art of baking, they’ve crafted a user-friendly,
-                            visually appealing platform that captures the essence of our French-inspired creations. Now,
-                            Jecole’s Bakery is just a click away, bringing the aroma of freshly baked bread into your home
-                            from wherever you are.
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <div class="title">JeCole's</div>
-                        <div class="type">Developers</div>
-                        <div class="description">
-                            Nikolai Ng - The team behind the Jecole’s Bakery website is a dynamic group of
-                            talented developers who have worked to bring the charm of our bakery into the digital world.
-                            With a shared passion for both technology and the art of baking, they’ve crafted a user-friendly,
-                            visually appealing platform that captures the essence of our French-inspired creations. Now,
-                            Jecole’s Bakery is just a click away, bringing the aroma of freshly baked bread into your home
-                            from wherever you are.
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <div class="title">JeCole's</div>
-                        <div class="type">Developers</div>
-                            <div class="description">
-                                Jizel Vergara - The team behind the Jecole’s Bakery website is a dynamic group
-                                of talented developers who have worked to bring the charm of our bakery into the digital world.
-                                With a shared passion for both technology and the art of baking, they’ve crafted a user-friendly,
-                                visually appealing platform that captures the essence of our French-inspired creations. Now,
-                                Jecole’s Bakery is just a click away, bringing the aroma of freshly baked bread into your home
-                                from wherever you are.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="title">JeCole's</div>
-                            <div class="type">Developers</div>
-                                <div class="description">
-                                    Rochelle Salucop - The team behind the Jecole’s Bakery website is a dynamic
-                                    group of talented developers who have worked to bring the charm of our bakery into the digital
-                                    world. With a shared passion for both technology and the art of baking, they’ve crafted a
-                                    user-friendly, visually appealing platform that captures the essence of our French-inspired
-                                    creations. Now, Jecole’s Bakery is just a click away, bringing the aroma of freshly baked bread
-                                    into your home from wherever you are.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="thumbnail">
-                        <div class="item">
-                            <img src="{% static 'images/roch.jpg' %}" alt="">
-                        </div>
-                        <div class="item">
-                            <img src="{% static 'images/logo.jpg' %}" alt="">
-                        </div>
-                        <div class="item">
-                            <img src="{% static 'images/CA.jpg' %}" alt="">
-                        </div>
-                        <div class="item">
-                            <img src="{% static 'images/me.jpg' %}" alt="">
-                        </div>
-                        <div class="item">
-                            <img src="{% static 'images/jay.jpg' %}" alt="">
-                        </div>
-                        <div class="item">
-                            <img src="{% static 'images/ng.jpg' %}" alt="">
-                        </div>
-                        <div class="item">
-                            <img src="{% static 'images/jizel.jpg' %}" alt="">
-                        </div>
-                    </div>
-                    <div class="nextPrevArrows">
-                        <button class="prev"> < </button>
-                        <button class="next"> > </button>
-                    </div>
-    </div>
-{% endblock %}
+        </section>
 
-{% block extra_js %}
-    <script src="{% static 'scripts/aboutus.js' %}"></script>
+        <section class="about-section">
+            <h2 class="section-title">About Our Breads</h2>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <img
+                        src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2074&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        alt="Fresh bread"
+                        class="img-fluid rounded"
+                    />
+                </div>
+                <div class="col-md-6">
+                    <p>
+                        Dough Re Mi Patisserie brings the timeless elegance of French baking to your table.
+                        Specializing in classic French breads, we offer a selection that showcases the rich, flavorful
+                        tradition of French cuisine. From the perfect baguette to artisanal loaves, each bread is crafted
+                        with passion and precision to bring you an authentic taste of France in every bite.
+                    </p>
+                    <p>
+                        Dough Re Mi French pastries offers a sensory experience that begins with their delicate, golden-brown
+                        crusts and ends with rich, flavorful fillings. Each bite is a symphony of textures—light and flaky 
+                        layers that melt in your mouth, often giving way to smooth creams or rich chocolate centers. The buttery, 
+                        slightly sweet aroma entices the senses, while the balanced flavors of almond, vanilla, or fruit add a
+                        touch of sophistication. Whether you're enjoying a croissant, éclair, or tart, these pastries deliver a 
+                        perfect blend of crispiness and softness, making every bite a luxurious treat. At Dough Re Mi Patisserie, we
+                        believe that every loaf tells a story, and we are excited to share ours with you.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section my-5 text-center">
+            <h2 class="section-title">Ready to Taste the Difference?</h2>
+            <p class="lead mb-4">Visit Dough Re Mi Patisserie today and experience the magic of authentic French pastries!</p>
+            <a href="{% url 'menu' %}" class="btn btn-custom btn-lg">Order Now</a>
+        </section>
+    </main>
 {% endblock %}

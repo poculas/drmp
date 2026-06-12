@@ -11,7 +11,7 @@ if(!isset($_SESSION['is_logged_in'])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Je'Cole's Bakery</title>
+    <title>Dough Re Mi Patisserie</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel ="stylesheet" href="styles.css">
@@ -95,7 +95,7 @@ if(!isset($_SESSION['is_logged_in'])){
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="index.php"><img src="images/logoWhite.png" alt="Je'Cole's Bakery"></a>
+            <a class="navbar-brand" href="index.php"><img src="../images/logoWhite.png?v=2" alt="Dough Re Mi Patisserie"></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -121,8 +121,8 @@ if(!isset($_SESSION['is_logged_in'])){
             <source src="media/AboutBread.mp4" type="video/mp4">
         </video>
         <div class="hero-content">
-            <img id="menuLogo" src="images/tab.png" alt="Je'Cole's Bakery Logo">
-            <h1 class="display-4">Je'Cole's Bakery</h1>
+            <img id="menuLogo" src="images/tab.png" alt="Dough Re Mi Patisserie Logo">
+            <h1 class="display-4">Dough Re Mi Patisserie</h1>
             <p class="lead">So fast, so good! The home of freshly baked French pastries.</p>
         </div>
     </div>
@@ -273,7 +273,7 @@ if(!isset($_SESSION['is_logged_in'])){
 
     <div class="cart">
         <div class="cart-header">
-            <img src="images/logoWhite.png" alt="Je'Cole's Bakery Logo" style="height: 40px;">
+            <img src="../images/logoWhite.png?v=2" alt="Dough Re Mi Patisserie Logo" style="height: 40px;">
         </div>
         <div class="cart-body">
             <table class="table">
@@ -317,8 +317,8 @@ if(!isset($_SESSION['is_logged_in'])){
                     <a href="https://www.instagram.com/" class="text-white"><i class="fab fa-instagram"></i></a>
                 </div>
                 <div class="col-md-4">
-                    <p>© 2024, Je'Cole's Bakery Online Quiapo Manila</p>
-                    <p>Je'Cole's Bakery Online</p>
+                    <p>© 2024, Dough Re Mi Patisserie Online Quiapo Manila</p>
+                    <p>Dough Re Mi Patisserie Online</p>
                 </div>
             </div>
         </div>

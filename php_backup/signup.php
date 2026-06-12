@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="index.php"><img src="images/logoWhite.png" alt="Je'Cole's Bakery"></a>
+            <a class="navbar-brand" href="index.php"><img src="../images/logoWhite.png?v=2" alt="Dough Re Mi Patisserie"></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -171,8 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                     <a href="https://www.instagram.com/" class="text-white"><i class="fab fa-instagram"></i></a>
                 </div>
                 <div class="col-md-4">
-                    <p>© 2024, Je'Cole's Bakery Online Quiapo Manila</p>
-                    <p>Je'Cole's Bakery Online</p>
+                    <p>© 2024, Dough Re Mi Patisserie Online Quiapo Manila</p>
+                    <p>Dough Re Mi Patisserie Online</p>
                 </div>
             </div>
         </div>

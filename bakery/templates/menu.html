@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Je'Cole's Bakery - Menu{% endblock %}
+{% block title %}Dough Re Mi Patisserie - Menu{% endblock %}
 
 {% block extra_head %}
     <style>
@@ -17,6 +17,7 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: white;
+            z-index: 1;
         }
         .hero-content img {
             height: 80px;
@@ -86,8 +87,8 @@
             <source src="{% static 'media/AboutBread.mp4' %}" type="video/mp4">
         </video>
         <div class="hero-content">
-            <img id="menuLogo" src="{% static 'images/tab.png' %}" alt="Je'Cole's Bakery Logo">
-            <h1 class="display-4">Je'Cole's Bakery</h1>
+            <img id="menuLogo" src="{% static 'images/tab.png' %}" alt="Dough Re Mi Patisserie Logo">
+            <h1 class="display-4">Dough Re Mi Patisserie</h1>
             <p class="lead">So fast, so good! The home of freshly baked French pastries.</p>
         </div>
     </div>
@@ -119,7 +120,7 @@
 
     <div class="cart">
         <div class="cart-header">
-            <img src="{% static 'images/logoWhite.png' %}" alt="Je'Cole's Bakery Logo" style="height: 40px;">
+            <img src="{% static 'images/logoWhite.png' %}?v=2" alt="Dough Re Mi Patisserie Logo" style="height: 40px;">
         </div>
         <div class="cart-body">
             <table class="table">

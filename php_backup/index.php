@@ -11,7 +11,7 @@ if(!isset($_SESSION['is_logged_in'])){
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Je'Cole's Bakery - Home</title>
+    <title>Dough Re Mi Patisserie - Home</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -194,7 +194,7 @@ if(!isset($_SESSION['is_logged_in'])){
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="index.php"><img src="images/logoWhite.png" alt="Je'Cole's Bakery"></a>
+            <a class="navbar-brand" href="index.php"><img src="../images/logoWhite.png?v=2" alt="Dough Re Mi Patisserie"></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -219,7 +219,7 @@ if(!isset($_SESSION['is_logged_in'])){
         <source src="media/paris.mp4" type="video/mp4" />
       </video>
       <div class="hero-content">
-        <h1>Welcome to Je'Cole's Bakery</h1>
+        <h1>Welcome to Dough Re Mi Patisserie</h1>
         <p>Experience the taste of freshly baked French pastries</p>
         <a
           href="menu.php"
@@ -268,15 +268,15 @@ if(!isset($_SESSION['is_logged_in'])){
         <div class="about-section">
           <div class="row align-items-center">
             <div class="col-md-6">
-              <h2 class="section-title text-start">About Je'Cole's Bakery</h2>
+              <h2 class="section-title text-start">About Dough Re Mi Patisserie</h2>
               <p>
-                At Je'Cole's Bakery, we're passionate about creating authentic
+                At Dough Re Mi Patisserie, we're passionate about creating authentic
                 French pastries using traditional techniques and the finest
                 ingredients. Our master bakers bring a taste of Paris to your
                 neighborhood, ensuring each bite is a delightful experience.
               </p>
               <p>
-                Founded in 2010, Je'Cole's Bakery has become a beloved
+                Founded in 2010, Dough Re Mi Patisserie has become a beloved
                 institution in our community, known for our commitment to
                 quality and our warm, welcoming atmosphere.
               </p>
@@ -294,7 +294,7 @@ if(!isset($_SESSION['is_logged_in'])){
       </section>
 
       <section class="why-choose-us my-5">
-        <h2 class="section-title">Why Choose Je'Cole's Bakery?</h2>
+        <h2 class="section-title">Why Choose Dough Re Mi Patisserie?</h2>
         <div class="row">
           <div class="col-md-4 mb-4">
             <div class="text-center">
@@ -369,7 +369,7 @@ if(!isset($_SESSION['is_logged_in'])){
       </section>
 
       <section class="gallery-section my-5">
-        <h2 class="section-title">Our Bakery Gallery</h2>
+        <h2 class="section-title">Our Patisserie Gallery</h2>
         <div class="row">
           <div class="col-md-4 mb-4">
             <img
@@ -410,105 +410,10 @@ if(!isset($_SESSION['is_logged_in'])){
         </div>
       </section>
 
-      <section class="testimonials my-5">
-        <h2 class="section-title">What Our Customers Say</h2>
-        <div class="row">
-          <div class="col-md-6 mb-4">
-            <div class="testimonial">
-              <img
-                src="images/jay.jpg"
-                class="testimonial-image"
-              />
-              <div class="testimonial-rating">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-              </div>
-              <p>
-                "The croissants at Je'Cole's are simply divine. They transport
-                me back to the streets of Paris with every bite! The buttery
-                layers and perfect flakiness are unmatched. I've tried
-                croissants all over the city, but none compare to these."
-              </p>
-              <h6>Josephine Kagat</h6>
-            </div>
-          </div>
-          <div class="col-md-6 mb-4">
-            <div class="testimonial">
-              <img
-                src="images/izel.jpg"
-                class="testimonial-image"
-              />
-              <div class="testimonial-rating">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <p>
-                "I've never tasted a baguette this good outside of France.
-                Je'Cole's has nailed the perfect crust-to-crumb ratio! The crust
-                is crispy and the inside is soft and airy. It's become a staple
-                in our household for family dinners."
-              </p>
-              <h6>Gcell Batumbakal</h6>
-            </div>
-          </div>
-          <div class="col-md-6 mb-4">
-            <div class="testimonial">
-              <img
-                src="images/ng, nikolai.jpg"
-                class="testimonial-image"
-              />
-              <div class="testimonial-rating">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-              </div>
-              <p>
-                "As a professional chef, I have high standards for pastries.
-                Je'Cole's Bakery exceeds them all. Their attention to detail and
-                commitment to using high-quality ingredients is evident in every
-                bite. The Pain au Chocolat is particularly outstanding."
-              </p>
-              <h6>Nicholas Matigas</h6>
-            </div>
-          </div>
-          <div class="col-md-6 mb-4">
-            <div class="testimonial">
-              <img
-                src="images/me.jpg"
-                class="testimonial-image"
-              />
-              <div class="testimonial-rating">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <p>
-                "Je'Cole's Bakery has become my go-to place for client meetings.
-                The atmosphere is perfect, and the pastries always impress.
-                Their selection of French pastries adds a touch of
-                sophistication to our discussions. Highly recommended for
-                business or pleasure!"
-              </p>
-              <h6>Jeremiah Cupal</h6>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="cta-section my-5 text-center">
         <h2 class="section-title">Ready to Taste the Difference?</h2>
         <p class="lead mb-4">
-          Visit Je'Cole's Bakery today and experience the magic of authentic
+          Visit Dough Re Mi Patisserie today and experience the magic of authentic
           French pastries!
         </p>
         <a href="menu.php" class="btn btn-custom btn-lg">Order Now</a>
@@ -534,8 +439,8 @@ if(!isset($_SESSION['is_logged_in'])){
                     <a href="https://www.instagram.com/" class="text-white"><i class="fab fa-instagram"></i></a>
                 </div>
                 <div class="col-md-4">
-                    <p>© 2024, Je'Cole's Bakery Online Quiapo Manila</p>
-                    <p>Je'Cole's Bakery Online</p>
+                    <p>© 2024, Dough Re Mi Patisserie Online Quiapo Manila</p>
+                    <p>Dough Re Mi Patisserie Online</p>
                 </div>
             </div>
         </div>
