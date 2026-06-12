@@ -1,4 +1,6 @@
 import json
+import random
+import string
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -6,9 +8,68 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.utils import timezone
+from datetime import timedelta
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 
-from bakery.models import Product, CartItem, Order, Receipt, UserProfile
+from bakery.models import Product, CartItem, Order, Receipt, UserProfile, MFACode
 from bakery.forms import SignUpForm, DeliveryForm
+
+# ============================================================================
+# 2FA Helper Functions
+# ============================================================================
+
+def generate_mfa_code(length=6):
+    """Generate a random 6-digit code"""
+    return ''.join(random.choices(string.digits, k=length))
+
+def send_mfa_code_via_email(user, code):
+    """Send MFA code via email"""
+    try:
+        subject = "Your 2FA Verification Code - Je'Cole's Bakery"
+        message = f"""
+Dear {user.first_name or user.username},
+
+Your 2FA verification code is: {code}
+
+This code will expire in 10 minutes.
+
+If you did not request this code, please ignore this email.
+
+Best regards,
+Je'Cole's Bakery Team
+        """
+        send_mail(
+            subject,
+            message,
+            'noreply@jecolebakery.com',
+            [user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Email sending failed: {str(e)}")
+        return False
+
+def create_mfa_code(user):
+    """Create and send MFA code via email only"""
+    # Delete existing code
+    MFACode.objects.filter(user=user).delete()
+    
+    code = generate_mfa_code()
+    expires_at = timezone.now() + timedelta(minutes=10)
+    
+    mfa_obj = MFACode.objects.create(
+        user=user,
+        code=code,
+        method='email',
+        expires_at=expires_at
+    )
+    
+    send_mfa_code_via_email(user, code)
+    return mfa_obj
 
 def index_view(request):
     featured_products = Product.objects.all()[:3]
@@ -60,20 +121,74 @@ def signup_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('index')
-    
+
+    context = {}
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        
+
+        # Rate limiting: Check IP-based rate limit (max 10 attempts per 15 minutes)
+        client_ip = request.META.get('REMOTE_ADDR')
+        rate_limit_key = f'login_rate_limit_{client_ip}'
+        attempts = cache.get(rate_limit_key, 0)
+
+        if attempts >= 10:
+            messages.error(request, "Too many login attempts. Please try again later.")
+            return render(request, 'login.html', context)
+
+        # Increment rate limit counter
+        cache.set(rate_limit_key, attempts + 1, 900)  # 15 minutes
+
         user = authenticate(request, username=email, password=password)
         if user is not None:
+            # Check if account is locked
+            try:
+                profile = user.profile
+                if profile.is_locked():
+                    remaining_time = profile.lockout_until - timezone.now()
+                    seconds = int(remaining_time.total_seconds())
+                    minutes = int(seconds / 60)
+                    messages.error(request, f"Account is locked. Please try again in {minutes} minutes.")
+                    context['lockout_seconds'] = seconds
+                    return render(request, 'login.html', context)
+
+                # Reset failed attempts on successful authentication
+                profile.reset_failed_attempts()
+                
+                # Check if user has email 2FA enabled
+                if profile.mfa_email_enabled:
+                    create_mfa_code(user)
+                    request.session['mfa_user_id'] = user.id
+                    request.session['mfa_method'] = 'email'
+                    messages.info(request, "Verification code sent to your email.")
+                    return redirect('verify_mfa')
+            except UserProfile.DoesNotExist:
+                # Create profile if it doesn't exist
+                UserProfile.objects.create(user=user, contactnumber='')
+            
+            # No 2FA or profile doesn't exist, log in normally
             auth_login(request, user)
             messages.success(request, "Login successful!")
             return redirect('index')
         else:
-            messages.error(request, "Incorrect Username or Password!")
-            
-    return render(request, 'login.html')
+            # Failed login attempt - increment counter for the user if exists
+            try:
+                user_obj = User.objects.get(username=email)
+                profile = user_obj.profile
+                profile.increment_failed_attempts()
+                
+                if profile.is_locked():
+                    messages.error(request, "Account locked due to too many failed attempts. Please try again in 30 minutes.")
+                else:
+                    remaining_attempts = 5 - profile.failed_login_attempts
+                    context['remaining_attempts'] = remaining_attempts
+                    messages.error(request, f"Incorrect Username or Password! {remaining_attempts} attempts remaining.")
+            except User.DoesNotExist:
+                messages.error(request, "Incorrect Username or Password!")
+            except UserProfile.DoesNotExist:
+                messages.error(request, "Incorrect Username or Password!")
+
+    return render(request, 'login.html', context)
 
 def logout_view(request):
     if request.user.is_authenticated:
@@ -222,4 +337,115 @@ def receipt_view(request):
         'receipt': receipt,
         'orders': orders,
         'contact_number': contact_number
+    })
+
+@login_required
+def profile_view(request):
+    profile = request.user.profile
+    return render(request, 'profile.html', {
+        'profile': profile
+    })
+
+@login_required
+@require_POST
+def toggle_mfa(request):
+    """
+    Toggle email MFA for the authenticated user.
+    
+    Expected POST data: {'type': 'email'}
+    
+    Returns JSON with success status and updated MFA state.
+    """
+    try:
+        # Parse JSON request body
+        data = json.loads(request.body)
+        mfa_type = data.get('type', '').lower()
+        
+        # Validate MFA type
+        if mfa_type != 'email':
+            return JsonResponse({
+                'success': False,
+                'message': f'Invalid MFA type: {mfa_type}. Only "email" is supported.'
+            }, status=400)
+        
+        # Get user profile
+        try:
+            profile = request.user.profile
+        except UserProfile.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'User profile not found. Please contact support.'
+            }, status=404)
+        
+        # Toggle email-only MFA setting
+        profile.mfa_email_enabled = not profile.mfa_email_enabled
+        profile.save()
+        
+        return JsonResponse({
+            'success': True,
+            'type': 'email',
+            'message': f'Email MFA has been {"enabled" if profile.mfa_email_enabled else "disabled"}',
+            'mfa_email_enabled': profile.mfa_email_enabled
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON in request body'
+        }, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Server error: {str(e)}'
+        }, status=500)
+
+def verify_mfa(request):
+    """2FA verification page"""
+    mfa_user_id = request.session.get('mfa_user_id')
+    mfa_method = request.session.get('mfa_method')
+    
+    if not mfa_user_id or not mfa_method:
+        messages.error(request, "Invalid 2FA session. Please login again.")
+        return redirect('login')
+    
+    user = get_object_or_404(User, id=mfa_user_id)
+    
+    if request.method == 'POST':
+        code = request.POST.get('code', '').strip()
+        
+        try:
+            mfa_code = MFACode.objects.get(user=user)
+            
+            # Check if code is expired
+            if mfa_code.is_expired():
+                messages.error(request, "Verification code has expired. Please login again.")
+                del request.session['mfa_user_id']
+                del request.session['mfa_method']
+                return redirect('login')
+            
+            # Check if code matches
+            if mfa_code.code == code:
+                # Code is correct, log in the user
+                auth_login(request, user)
+                
+                # Clean up MFA code
+                mfa_code.delete()
+                del request.session['mfa_user_id']
+                del request.session['mfa_method']
+                
+                messages.success(request, "Login successful!")
+                return redirect('index')
+            else:
+                messages.error(request, "Invalid verification code. Please try again.")
+        
+        except MFACode.DoesNotExist:
+            messages.error(request, "No verification code found. Please login again.")
+            del request.session['mfa_user_id']
+            del request.session['mfa_method']
+            return redirect('login')
+    
+    return render(request, 'verify_mfa.html', {
+        'mfa_method': mfa_method,
+        'user_email': user.email
     })

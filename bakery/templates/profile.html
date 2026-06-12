@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile - Je'Cole's Bakery{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f8f9fa;
+        padding-bottom: 20px;
+    }
+
+    .profile-header h1 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .profile-header p {
+        color: #666;
+        margin: 5px 0;
+    }
+
+    .profile-section {
+        margin-bottom: 30px;
+    }
+
+    .profile-section h3 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        border-left: 4px solid #ff6b6b;
+        padding-left: 10px;
+    }
+
+    .profile-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .profile-info label {
+        font-weight: 600;
+        color: #333;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .profile-info p {
+        color: #666;
+        margin: 0;
+    }
+
+    .mfa-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .mfa-toggle-left {
+        flex: 1;
+    }
+
+    .mfa-toggle-left h5 {
+        color: #333;
+        margin: 0 0 5px 0;
+        font-weight: 600;
+    }
+
+    .mfa-toggle-left p {
+        color: #666;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        width: 60px;
+        height: 30px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        margin: 0;
+        position: absolute;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 30px;
+        pointer-events: none;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 24px;
+        width: 24px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: #28a745;
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(30px);
+    }
+
+    .toggle-switch input:focus + .toggle-slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    .mfa-status {
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .mfa-status.enabled {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .mfa-status.disabled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .loading {
+        display: none;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+
+    .loading.active {
+        display: block;
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #ff6b6b;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-back:hover {
+        color: #ff5252;
+    }
+
+    .alert-message {
+        padding: 12px 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        display: none;
+    }
+
+    .alert-message.show {
+        display: block;
+    }
+
+    .alert-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <a href="{% url 'index' %}" class="btn-back">← Back to Home</a>
+
+    <div class="alert-message" id="alertMessage"></div>
+
+    <div class="profile-header">
+        <h1><i class="fas fa-user-circle"></i> Profile</h1>
+        <p><strong>{{ request.user.first_name }} {{ request.user.last_name }}</strong></p>
+        <p>{{ request.user.email }}</p>
+    </div>
+
+    <div class="profile-section">
+        <h3>Account Information</h3>
+        <div class="profile-info">
+            <label>Email Address</label>
+            <p>{{ request.user.email }}</p>
+        </div>
+        <div class="profile-info">
+            <label>Contact Number</label>
+            <p>{{ profile.contactnumber }}</p>
+        </div>
+        <div class="profile-info">
+            <label>Username</label>
+            <p>{{ request.user.username }}</p>
+        </div>
+    </div>
+
+    <div class="profile-section">
+        <h3>Two-Factor Authentication (2FA)</h3>
+        <p style="color: #666; margin-bottom: 20px;">Enhance your account security by enabling two-factor authentication through email codes.</p>
+
+        <!-- Email MFA Toggle -->
+        <div class="mfa-toggle" style="margin-top: 20px;">
+            <div class="mfa-toggle-left">
+                <h5><i class="fas fa-envelope"></i> Email Authentication</h5>
+                <p>Receive verification codes via email</p>
+            </div>
+            <label class="toggle-switch" for="emailMfaToggle">
+                <input type="checkbox" id="emailMfaToggle" {% if profile.mfa_email_enabled %}checked{% endif %} data-type="email">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="loading" id="emailLoading">
+            <i class="fas fa-spinner fa-spin"></i> Processing...
+        </div>
+        <div class="mfa-status" id="emailStatus" {% if profile.mfa_email_enabled %}style="display: block;" class="enabled"{% else %}style="display: none;" class="disabled"{% endif %}>
+            Email Authentication is {% if profile.mfa_email_enabled %}<strong>ENABLED</strong>{% else %}<strong>DISABLED</strong>{% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ============================================================================
+    // MFA Toggle Management - Complete Corrected Implementation
+    // ============================================================================
+    
+    console.log('[MFA] Script initialized - waiting for DOM ready');
+
+    // Get CSRF token from meta tag (added in base.html)
+    function getCSRFToken() {
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (!token) {
+            console.error('[MFA] CSRF token not found in meta tag');
+        } else {
+            console.log('[MFA] CSRF token found');
+        }
+        return token;
+    }
+
+    // Display alert message to user
+    function showAlert(message, type) {
+        const alertElement = document.getElementById('alertMessage');
+        if (!alertElement) {
+            console.error('[MFA] Alert element not found');
+            return;
+        }
+        
+        alertElement.textContent = message;
+        alertElement.className = `alert-message show ${type}`;
+        console.log(`[MFA] Alert displayed: ${message}`);
+        
+        setTimeout(() => {
+            alertElement.classList.remove('show');
+        }, 4000);
+    }
+
+    // Main MFA toggle handler - called when checkbox changes
+    async function handleMFAToggle(event) {
+        const checkbox = event.target;
+        const mfaType = checkbox.dataset.type;
+        
+        console.log(`[MFA] Toggle triggered for type: ${mfaType}, checked: ${checkbox.checked}`);
+
+        const loadingElement = document.getElementById(`${mfaType}Loading`);
+        const statusElement = document.getElementById(`${mfaType}Status`);
+
+        // Show loading state
+        if (loadingElement) {
+            loadingElement.classList.add('active');
+        }
+
+        try {
+            const csrfToken = getCSRFToken();
+            if (!csrfToken) {
+                throw new Error('CSRF token not available');
+            }
+
+            console.log(`[MFA] Sending fetch request for ${mfaType} MFA toggle`);
+            
+            const response = await fetch('/toggle-mfa.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ type: mfaType })
+            });
+
+            console.log(`[MFA] Response status: ${response.status}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log(`[MFA] Response data:`, data);
+
+            if (data.success) {
+                // Update visual feedback
+                showAlert(data.message, 'success');
+                
+                const isEnabled = data.mfa_email_enabled;
+                const statusText = isEnabled ? 'ENABLED' : 'DISABLED';
+                const statusClass = isEnabled ? 'enabled' : 'disabled';
+                
+                if (statusElement) {
+                    statusElement.textContent = `Email Authentication is ${statusText}`;
+                    statusElement.className = `mfa-status ${statusClass}`;
+                    statusElement.style.display = 'block';
+                }
+                
+                console.log(`[MFA] Email MFA is now ${isEnabled ? 'ENABLED' : 'DISABLED'}`);
+            } else {
+                // Error from backend
+                showAlert(data.message || 'Failed to toggle MFA', 'error');
+                // Revert checkbox
+                checkbox.checked = !checkbox.checked;
+                console.error(`[MFA] Backend error:`, data.message);
+            }
+        } catch (error) {
+            console.error(`[MFA] Fetch error:`, error);
+            showAlert(`Error: ${error.message}`, 'error');
+            // Revert checkbox on error
+            checkbox.checked = !checkbox.checked;
+        } finally {
+            // Hide loading state
+            if (loadingElement) {
+                loadingElement.classList.remove('active');
+            }
+        }
+    }
+
+    // Initialize event listeners when DOM is ready
+    function initializeMFAToggles() {
+        console.log('[MFA] Initializing toggle listeners');
+
+        const emailMfaToggle = document.getElementById('emailMfaToggle');
+
+        if (emailMfaToggle) {
+            emailMfaToggle.addEventListener('change', handleMFAToggle);
+            console.log('[MFA] Email toggle listener attached');
+        } else {
+            console.error('[MFA] Email toggle element not found');
+        }
+    }
+
+    // Ensure DOM is ready before attaching listeners
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeMFAToggles);
+        console.log('[MFA] DOMContentLoaded listener attached');
+    } else {
+        // DOM already loaded
+        initializeMFAToggles();
+    }
+
+    console.log('[MFA] Script setup complete');
+</script>
+{% endblock %}
