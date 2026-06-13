@@ -57,6 +57,18 @@ class DeliveryForm(forms.Form):
     postalCode = forms.IntegerField(required=True, label="Postal Code")
     paymentMethod = forms.ChoiceField(choices=PAYMENT_CHOICES, required=True, label="Payment Method")
 
+    def clean_houseNumber(self):
+        house_number = self.cleaned_data.get('houseNumber')
+        if house_number is not None and house_number <= 0:
+            raise ValidationError("House number must be a positive integer.")
+        return house_number
+
+    def clean_postalCode(self):
+        postal_code = self.cleaned_data.get('postalCode')
+        if postal_code is not None and postal_code <= 0:
+            raise ValidationError("Postal code must be a positive integer.")
+        return postal_code
+
 class StaffCreateForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email Address")
     password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Password")

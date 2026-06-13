@@ -1,7 +1,10 @@
 import json
+import logging
 import random
 import string
 from decimal import Decimal
+
+logger = logging.getLogger('security')
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -109,6 +112,7 @@ def signup_view(request):
 
         if attempts >= 5:
             messages.error(request, "Too many signup attempts. Please try again later.")
+            logger.warning(f"SIGNUP_RATE_LIMIT | IP: {client_ip} | Attempts: {attempts}")
             return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
 
         # Increment rate limit counter
@@ -124,6 +128,7 @@ def signup_view(request):
 
         if not captcha_expected or captcha_submitted != captcha_expected:
             messages.error(request, "Invalid CAPTCHA. Please try again.")
+            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA | Expected: {captcha_expected}, Submitted: {captcha_submitted}")
             return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
 
         form = SignUpForm(request.POST)
@@ -139,10 +144,13 @@ def signup_view(request):
                 role='customer'  # Set default role to customer
             )
             
+            logger.info(f"SIGNUP_SUCCESS | IP: {client_ip} | User: {user.email}")
+            
             # Auto log in user
             user = authenticate(username=user.username, password=form.cleaned_data['password'])
             if user is not None:
                 auth_login(request, user)
+                logger.info(f"LOGIN_SUCCESS | IP: {client_ip} | User: {user.email} (Auto-login after signup)")
             
             messages.success(request, "Signup successful!")
             return redirect('index')
@@ -152,6 +160,7 @@ def signup_view(request):
                 for error in field_errors:
                     errors.append(error)
             error_msg = " ".join(errors)
+            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Form validation errors: {error_msg}")
             messages.error(request, error_msg)
     else:
         form = SignUpForm()
@@ -172,6 +181,7 @@ def login_view(request):
 
     context = {}
     if request.method == 'POST':
+        client_ip = get_client_ip(request)
         # CAPTCHA validation
         captcha_submitted = request.POST.get('captcha', '').strip().upper()
         captcha_expected = request.session.get('captcha_code')
@@ -182,18 +192,19 @@ def login_view(request):
 
         if not captcha_expected or captcha_submitted != captcha_expected:
             messages.error(request, "Invalid CAPTCHA. Please try again.")
+            logger.warning(f"LOGIN_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA")
             return render(request, 'login.html', context)
 
         email = request.POST.get('email')
         password = request.POST.get('password')
 
         # Rate limiting: Check IP-based rate limit (max 10 attempts per 15 minutes)
-        client_ip = request.META.get('REMOTE_ADDR')
         rate_limit_key = f'login_rate_limit_{client_ip}'
         attempts = cache.get(rate_limit_key, 0)
 
         if attempts >= 10:
             messages.error(request, "Too many login attempts. Please try again later.")
+            logger.warning(f"LOGIN_RATE_LIMIT | IP: {client_ip} | Attempts: {attempts}")
             return render(request, 'login.html', context)
 
         # Increment rate limit counter
@@ -210,6 +221,7 @@ def login_view(request):
                     minutes = int(seconds / 60)
                     messages.error(request, f"Account is locked. Please try again in {minutes} minutes.")
                     context['lockout_seconds'] = seconds
+                    logger.warning(f"LOGIN_LOCKED | IP: {client_ip} | User: {user.email}")
                     return render(request, 'login.html', context)
 
                 # Reset failed attempts on successful authentication
@@ -221,6 +233,7 @@ def login_view(request):
                     request.session['mfa_user_id'] = user.id
                     request.session['mfa_method'] = 'email'
                     messages.info(request, "Verification code sent to your email.")
+                    logger.info(f"LOGIN_MFA_CHALLENGE | IP: {client_ip} | User: {user.email}")
                     return redirect('verify_mfa')
             except UserProfile.DoesNotExist:
                 # Create profile if it doesn't exist
@@ -229,6 +242,7 @@ def login_view(request):
             # No 2FA or profile doesn't exist, log in normally
             auth_login(request, user)
             messages.success(request, "Login successful!")
+            logger.info(f"LOGIN_SUCCESS | IP: {client_ip} | User: {user.email}")
             
             # Redirect based on role
             if user.is_superuser:
@@ -241,6 +255,7 @@ def login_view(request):
             return redirect('index')
         else:
             # Failed login attempt - increment counter for the user if exists
+            logger.warning(f"LOGIN_FAILED | IP: {client_ip} | Reason: Invalid credentials | Email: {email}")
             try:
                 user_obj = User.objects.get(username=email)
                 profile = user_obj.profile
@@ -248,6 +263,7 @@ def login_view(request):
                 
                 if profile.is_locked():
                     messages.error(request, "Account locked due to too many failed attempts. Please try again in 30 minutes.")
+                    logger.warning(f"ACCOUNT_LOCKED | IP: {client_ip} | User: {user_obj.email} | Reason: Max failed login attempts")
                 else:
                     remaining_attempts = 5 - profile.failed_login_attempts
                     context['remaining_attempts'] = remaining_attempts
@@ -261,7 +277,9 @@ def login_view(request):
 
 def logout_view(request):
     if request.user.is_authenticated:
+        user_email = request.user.email
         auth_logout(request)
+        logger.info(f"LOGOUT | User: {user_email}")
     return redirect('index')
 
 @ensure_csrf_cookie
@@ -297,6 +315,8 @@ def cart_add(request):
         data = json.loads(request.body)
         name = data.get('name')
         quantity = int(data.get('quantity', 1))
+        if quantity <= 0:
+            return JsonResponse({'message': 'Quantity must be greater than zero'}, status=400)
         product = get_object_or_404(Product, name=name)
         
         cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
@@ -471,7 +491,7 @@ def staff_product_create(request):
                 action='product_create',
                 description=f"Created product: {product.name}",
                 product_id=product.id,
-                ip_address=request.META.get('REMOTE_ADDR')
+                ip_address=get_client_ip(request)
             )
             messages.success(request, "Product created successfully!")
             return redirect('staff_products')
@@ -499,7 +519,7 @@ def staff_product_edit(request, product_id):
                 action='product_edit',
                 description=f"Edited product: {product.name}",
                 product_id=product.id,
-                ip_address=request.META.get('REMOTE_ADDR')
+                ip_address=get_client_ip(request)
             )
             messages.success(request, "Product updated successfully!")
             return redirect('staff_products')
@@ -521,7 +541,7 @@ def staff_product_delete(request, product_id):
             action='product_delete',
             description=f"Deleted product: {product_name}",
             product_id=product_id,
-            ip_address=request.META.get('REMOTE_ADDR')
+            ip_address=get_client_ip(request)
         )
         messages.success(request, "Product deleted successfully!")
         return redirect('staff_products')
@@ -552,7 +572,7 @@ def staff_order_detail(request, order_id):
                 action='order_status_update',
                 description=f"Updated order {order.id} status from {old_status} to {order.status}",
                 order_id=order.id,
-                ip_address=request.META.get('REMOTE_ADDR')
+                ip_address=get_client_ip(request)
             )
             messages.success(request, "Order status updated successfully!")
             return redirect('staff_orders')
@@ -580,7 +600,7 @@ def admin_staff_create(request):
                 action='staff_create',
                 description=f"Created staff account: {user.email}",
                 target_user_id=user.id,
-                ip_address=request.META.get('REMOTE_ADDR')
+                ip_address=get_client_ip(request)
             )
             messages.success(request, "Staff account created successfully!")
             return redirect('admin_staff_list')
@@ -606,7 +626,7 @@ def admin_staff_edit(request, user_id):
                     action=action,
                     description=f"{'Activated' if form.cleaned_data['is_active'] else 'Deactivated'} staff account: {user.email}",
                     target_user_id=user.id,
-                    ip_address=request.META.get('REMOTE_ADDR')
+                    ip_address=get_client_ip(request)
                 )
             messages.success(request, "Staff account updated successfully!")
             return redirect('admin_staff_list')
@@ -628,7 +648,7 @@ def admin_staff_delete(request, user_id):
             action='staff_deactivate',
             description=f"Deleted staff account: {user_email}",
             target_user_id=user_id,
-            ip_address=request.META.get('REMOTE_ADDR')
+            ip_address=get_client_ip(request)
         )
         messages.success(request, "Staff account deleted successfully!")
         return redirect('admin_staff_list')
@@ -643,9 +663,11 @@ def change_password_view(request):
             user = form.save()
             update_session_auth_hash(request, user)  # Important to keep user logged in
             messages.success(request, "Your password was successfully updated.")
+            logger.info(f"PASSWORD_CHANGE_SUCCESS | User: {request.user.email}")
             return redirect('profile')
         else:
             messages.error(request, "Please correct the error below.")
+            logger.warning(f"PASSWORD_CHANGE_FAILED | User: {request.user.email} | Reason: Form errors: {form.errors.as_text()}")
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'change_password.html', {'form': form})
@@ -657,12 +679,15 @@ def change_email_view(request):
         if form.is_valid():
             new_email = form.cleaned_data.get('new_email')
             user = request.user
+            old_email = user.email
             user.email = new_email
             user.save()
             messages.success(request, "Your email was successfully updated.")
+            logger.info(f"EMAIL_CHANGE_SUCCESS | User: {old_email} | New Email: {new_email}")
             return redirect('profile')
         else:
             messages.error(request, "Please correct the error below.")
+            logger.warning(f"EMAIL_CHANGE_FAILED | User: {request.user.email} | Reason: Form errors: {form.errors.as_text()}")
     else:
         form = EmailChangeForm(request.user)
     return render(request, 'change_email.html', {'form': form})
@@ -707,6 +732,7 @@ def toggle_mfa(request):
         # Toggle email-only MFA setting
         profile.mfa_email_enabled = not profile.mfa_email_enabled
         profile.save()
+        logger.info(f"MFA_TOGGLED | User: {request.user.email} | Enabled: {profile.mfa_email_enabled}")
         
         return JsonResponse({
             'success': True,
@@ -734,12 +760,28 @@ def verify_mfa(request):
     
     if not mfa_user_id or not mfa_method:
         messages.error(request, "Invalid 2FA session. Please login again.")
+        logger.warning("MFA_VERIFY_FAILED | Reason: No MFA session variables found")
         return redirect('login')
     
     user = get_object_or_404(User, id=mfa_user_id)
     
     if request.method == 'POST':
         code = request.POST.get('code', '').strip()
+        client_ip = get_client_ip(request)
+        
+        # Rate limiting: Max 5 attempts
+        mfa_failed_attempts_key = f'mfa_failed_attempts_{mfa_user_id}'
+        failed_attempts = cache.get(mfa_failed_attempts_key, 0)
+        
+        if failed_attempts >= 5:
+            MFACode.objects.filter(user=user).delete()
+            if 'mfa_user_id' in request.session:
+                del request.session['mfa_user_id']
+            if 'mfa_method' in request.session:
+                del request.session['mfa_method']
+            messages.error(request, "Too many failed 2FA attempts. Please login again.")
+            logger.warning(f"MFA_LOCKOUT | IP: {client_ip} | User: {user.email} | Reason: Max failed 2FA attempts exceeded")
+            return redirect('login')
         
         try:
             mfa_code = MFACode.objects.get(user=user)
@@ -747,6 +789,7 @@ def verify_mfa(request):
             # Check if code is expired
             if mfa_code.is_expired():
                 messages.error(request, "Verification code has expired. Please login again.")
+                logger.warning(f"MFA_VERIFY_FAILED | IP: {client_ip} | User: {user.email} | Reason: Code expired")
                 del request.session['mfa_user_id']
                 del request.session['mfa_method']
                 return redirect('login')
@@ -755,19 +798,38 @@ def verify_mfa(request):
             if mfa_code.code == code:
                 # Code is correct, log in the user
                 auth_login(request, user)
+                logger.info(f"MFA_VERIFY_SUCCESS | IP: {client_ip} | User: {user.email}")
                 
-                # Clean up MFA code
+                # Clean up MFA code and cached attempts
                 mfa_code.delete()
+                cache.delete(mfa_failed_attempts_key)
                 del request.session['mfa_user_id']
                 del request.session['mfa_method']
                 
                 messages.success(request, "Login successful!")
                 return redirect('index')
             else:
-                messages.error(request, "Invalid verification code. Please try again.")
+                # Increment failed attempts
+                failed_attempts += 1
+                cache.set(mfa_failed_attempts_key, failed_attempts, 600)  # expires in 10 mins
+                
+                if failed_attempts >= 5:
+                    mfa_code.delete()
+                    if 'mfa_user_id' in request.session:
+                        del request.session['mfa_user_id']
+                    if 'mfa_method' in request.session:
+                        del request.session['mfa_method']
+                    messages.error(request, "Too many failed 2FA attempts. Please login again.")
+                    logger.warning(f"MFA_LOCKOUT | IP: {client_ip} | User: {user.email} | Reason: Max failed 2FA attempts")
+                    return redirect('login')
+                
+                remaining_attempts = 5 - failed_attempts
+                messages.error(request, f"Invalid verification code. {remaining_attempts} attempts remaining.")
+                logger.warning(f"MFA_VERIFY_FAILED | IP: {client_ip} | User: {user.email} | Reason: Incorrect code submitted")
         
         except MFACode.DoesNotExist:
             messages.error(request, "No verification code found. Please login again.")
+            logger.warning(f"MFA_VERIFY_FAILED | IP: {client_ip} | User: {user.email} | Reason: No code in database")
             del request.session['mfa_user_id']
             del request.session['mfa_method']
             return redirect('login')

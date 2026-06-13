@@ -179,3 +179,162 @@ class CartTestCase(TestCase):
         # Verify cart was cleared
         self.assertFalse(CartItem.objects.filter(user=self.user).exists())
 
+import os
+import logging
+from django.conf import settings
+from bakery.models import AuditLog
+
+class LoggingTestCase(TestCase):
+    def setUp(self):
+        self.log_dir = os.path.join(settings.BASE_DIR, 'logs')
+        self.security_log_path = os.path.join(self.log_dir, 'security.log')
+        self.error_log_path = os.path.join(self.log_dir, 'errors.log')
+        
+    def test_log_directory_and_files_exist(self):
+        # Verify that the logs directory is created
+        self.assertTrue(os.path.isdir(self.log_dir))
+        
+        # Write dummy warning/info log to populate the files
+        logger = logging.getLogger('security')
+        logger.info("TEST_LOG_MESSAGE_SECURITY")
+        
+        err_logger = logging.getLogger('django.request')
+        err_logger.error("TEST_LOG_MESSAGE_ERROR")
+        
+        # Verify files exist and are populated
+        self.assertTrue(os.path.isfile(self.security_log_path))
+        self.assertTrue(os.path.isfile(self.error_log_path))
+        
+        with open(self.security_log_path, 'r') as f:
+            content = f.read()
+            self.assertIn("TEST_LOG_MESSAGE_SECURITY", content)
+            
+        with open(self.error_log_path, 'r') as f:
+            content = f.read()
+            self.assertIn("TEST_LOG_MESSAGE_ERROR", content)
+
+    def test_decoupled_audit_logging(self):
+        # Clear existing file contents to avoid collision
+        if os.path.isfile(self.security_log_path):
+            with open(self.security_log_path, 'w') as f:
+                f.write('')
+                
+        user = User.objects.create_user(username='staff@example.com', email='staff@example.com', password='Password123!')
+        
+        # Create database AuditLog record
+        AuditLog.objects.create(
+            user=user,
+            action='product_create',
+            description="Created a test product",
+            ip_address="127.0.0.1"
+        )
+        
+        # Verify that save() override correctly wrote to security.log
+        self.assertTrue(os.path.isfile(self.security_log_path))
+        with open(self.security_log_path, 'r') as f:
+            content = f.read()
+            self.assertIn("AUDIT_LOG", content)
+            self.assertIn("product_create", content)
+            self.assertIn("Created a test product", content)
+            self.assertIn("staff@example.com", content)
+
+from bakery.forms import DeliveryForm
+from bakery.models import MFACode
+from django.utils import timezone
+from datetime import timedelta
+
+class InputValidationTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='cust@example.com', email='cust@example.com', password='Password123!')
+        self.product = Product.objects.create(name='Valid Croissant', price=40.00, stock=10)
+
+    def test_delivery_form_validation(self):
+        # Test valid data
+        form_data = {
+            'houseNumber': 12,
+            'street': 'Main St',
+            'barangay': 'San Jose',
+            'city': 'Manila',
+            'postalCode': 1000,
+            'paymentMethod': 'Gcash'
+        }
+        form = DeliveryForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+        # Test invalid houseNumber (0 and negative)
+        form_data['houseNumber'] = 0
+        form = DeliveryForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('houseNumber', form.errors)
+
+        form_data['houseNumber'] = -5
+        form = DeliveryForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('houseNumber', form.errors)
+
+        # Test invalid postalCode (0 and negative)
+        form_data['houseNumber'] = 12
+        form_data['postalCode'] = 0
+        form = DeliveryForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('postalCode', form.errors)
+
+        form_data['postalCode'] = -100
+        form = DeliveryForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('postalCode', form.errors)
+
+    def test_cart_add_negative_or_zero_quantity(self):
+        self.client.login(username='cust@example.com', password='Password123!')
+        
+        # Try adding zero quantity
+        response = self.client.post(reverse('cart_add'), {
+            'name': 'Valid Croissant',
+            'quantity': 0
+        }, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Quantity must be greater than zero', response.json()['message'])
+
+        # Try adding negative quantity
+        response = self.client.post(reverse('cart_add'), {
+            'name': 'Valid Croissant',
+            'quantity': -5
+        }, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Quantity must be greater than zero', response.json()['message'])
+
+
+class MFABruteForceTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        cache.clear()
+        self.user = User.objects.create_user(username='mfauser@example.com', email='mfauser@example.com', password='Password123!')
+        self.mfa_code = MFACode.objects.create(
+            user=self.user,
+            code='123456',
+            method='email',
+            expires_at=timezone.now() + timedelta(minutes=10)
+        )
+        
+    def test_mfa_brute_force_lockout(self):
+        # Set session variable to simulate multi-factor authentication flow
+        session = self.client.session
+        session['mfa_user_id'] = self.user.id
+        session['mfa_method'] = 'email'
+        session.save()
+        
+        # First 4 attempts with wrong codes should fail but keep user in MFA flow
+        for i in range(4):
+            response = self.client.post(reverse('verify_mfa'), {'code': 'wrong'})
+            self.assertEqual(response.status_code, 200) # still on page
+            self.assertIn('mfa_user_id', self.client.session)
+            
+        # The 5th incorrect attempt should delete the code and lock the session
+        response = self.client.post(reverse('verify_mfa'), {'code': 'wrong'})
+        self.assertEqual(response.status_code, 302) # redirects to login
+        self.assertNotIn('mfa_user_id', self.client.session)
+        self.assertFalse(MFACode.objects.filter(user=self.user).exists())
+
+
+

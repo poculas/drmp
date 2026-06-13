@@ -1,3 +1,4 @@
+import logging
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -150,3 +151,14 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username if self.user else 'System'} - {self.action} at {self.timestamp}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            logger = logging.getLogger('security')
+            user_str = self.user.username if self.user else 'System'
+            logger.info(
+                f"AUDIT_LOG | Action: {self.action} | User: {user_str} | IP: {self.ip_address or 'N/A'} | Description: {self.description}"
+            )
+        except Exception:
+            pass

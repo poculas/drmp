@@ -41,6 +41,11 @@ function showToast(message, success) {
 function addToCart(name, price, quantity, event) {
     if (event) event.stopPropagation();   // prevent card onclick from firing
 
+    if (!window.USER_AUTHENTICATED) {
+        window.location.href = '/login.php?next=/menu.php';
+        return;
+    }
+
     var qty = parseInt(quantity) || 1;
     var item = { name: name, price: price, quantity: qty };
 

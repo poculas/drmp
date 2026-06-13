@@ -1,0 +1,19 @@
+2026-06-13 10:46:12,535 [INFO] security - AUDIT_LOG | Action: product_create | User: staff@example.com | IP: 127.0.0.1 | Description: Created a test product
+2026-06-13 10:46:12,535 [INFO] security - TEST_LOG_MESSAGE_SECURITY
+2026-06-13 10:46:12,663 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: mfauser@example.com | Reason: Incorrect code submitted
+2026-06-13 10:46:12,670 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: mfauser@example.com | Reason: Incorrect code submitted
+2026-06-13 10:46:12,671 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: mfauser@example.com | Reason: Incorrect code submitted
+2026-06-13 10:46:12,673 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: mfauser@example.com | Reason: Incorrect code submitted
+2026-06-13 10:46:12,674 [WARNING] security - MFA_LOCKOUT | IP: 127.0.0.1 | User: mfauser@example.com | Reason: Max failed 2FA attempts
+2026-06-13 10:46:12,677 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-13 10:46:12,936 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: wrong@example.com
+2026-06-13 10:46:12,938 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA | Expected: 9JUEK, Submitted: WRONG
+2026-06-13 10:46:12,942 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA | Expected: None, Submitted: WRONG
+2026-06-13 10:46:12,943 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA | Expected: None, Submitted: WRONG
+2026-06-13 10:46:12,944 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA | Expected: None, Submitted: WRONG
+2026-06-13 10:46:12,945 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA | Expected: None, Submitted: WRONG
+2026-06-13 10:46:12,946 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA | Expected: None, Submitted: WRONG
+2026-06-13 10:46:12,946 [WARNING] security - SIGNUP_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 5
+2026-06-13 10:46:12,947 [WARNING] security - SIGNUP_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 5
+2026-06-13 10:47:11,965 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: jecoleishome@gmail.com
+2026-06-13 10:47:26,134 [INFO] security - LOGOUT | User: jecoleishome@gmail.com
