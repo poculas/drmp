@@ -144,8 +144,7 @@ SESSION_COOKIE_AGE = 1800  # 30 minutes (in seconds)
 SESSION_SAVE_EVERY_REQUEST = True  # Refresh session expiry on every request (inactivity timeout)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Clear session when browser is closed
 
-# HTTPS Enforcement & Security Headers (Information Disclosure Mitigations)
-# Only enforce strict HTTPS redirect and secure cookies in production (non-DEBUG)
+# HTTPS Enforcement & Security Headers Only enforce strict HTTPS redirect and secure cookies in production (non-DEBUG)
 SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True' if not DEBUG else False
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG

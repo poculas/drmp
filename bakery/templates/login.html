@@ -16,6 +16,18 @@
                 <br><br><br>
                 <label for="password"><h4>Password:</h4></label>
                 <input type="password" name="password" id="password" required>
+                
+                <div class="captcha-wrapper" style="margin-top: 25px; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <img id="captcha-img" src="{% url 'captcha_image' %}" alt="CAPTCHA" style="height: 45px; border: 1px solid #ccc; border-radius: 4px; display: block;">
+                        <button type="button" onclick="refreshCaptcha()" class="btn btn-sm btn-outline-secondary" style="height: 45px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 0 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #f8f9fa; cursor: pointer;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <label for="captcha"><h4>Verification Code:</h4></label>
+                    <input type="text" name="captcha" id="captcha" placeholder="Enter code above" required autocomplete="off" style="width: 100%; padding: 12px 20px; box-sizing: border-box; border: none; border-bottom: 2px solid black;">
+                </div>
+
                 <button type="submit" name="login" id="submit"><h3>Log in</h3></button>
             </form>
 
@@ -45,6 +57,14 @@
 {% endblock %}
 
 {% block extra_js %}
+    <script>
+        function refreshCaptcha() {
+            const img = document.getElementById('captcha-img');
+            if (img) {
+                img.src = "{% url 'captcha_image' %}?t=" + new Date().getTime();
+            }
+        }
+    </script>
     {% if lockout_seconds %}
     <script>
         (function() {

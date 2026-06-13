@@ -40,4 +40,7 @@ urlpatterns = [
     
     # MFA AJAX API
     path('toggle-mfa.php', views.toggle_mfa, name='toggle_mfa'),
+    
+    # CAPTCHA Route
+    path('captcha.php', views.captcha_image_view, name='captcha_image'),
 ]

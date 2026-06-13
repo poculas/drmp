@@ -107,7 +107,7 @@ class StaffEditForm(forms.ModelForm):
         if not re.match(r'^\d{11}$', contactnumber):
             raise ValidationError("Phone number must be exactly 11 digits.")
         # Check if phone number is already registered by another user
-        if UserProfile.objects.filter(contactnumber=contact_number).exclude(user=self.instance).exists():
+        if UserProfile.objects.filter(contactnumber=contactnumber).exclude(user=self.instance).exists():
             raise ValidationError("Phone number is already registered.")
         return contactnumber
     

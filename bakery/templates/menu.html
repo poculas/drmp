@@ -4,206 +4,164 @@
 {% block title %}Dough Re Mi Patisserie - Menu{% endblock %}
 
 {% block extra_head %}
-    <style>
-        .card {
-            transition: transform 0.3s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
-        .btn-primary {
-            background-color: #8b4513;
-            border-color: #8b4513;
-        }
-        .btn-primary:hover {
-            background-color: #a0522d;
-            border-color: #a0522d;
-        }
-        .cart {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100%;
-            background-color: white;
-            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-            transition: right 0.3s ease;
-            z-index: 1000;
-        }
-        .cart.open {
-            right: 0;
-        }
-        .cart-header {
-            background-color: #8b4513;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-        .cart-body {
-            padding: 1rem;
-        }
-
-        .cart-footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #8b4513;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-    </style>
+<style>
+    .card {
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+    .btn-primary {
+        background-color: #8b4513;
+        border-color: #8b4513;
+    }
+    .btn-primary:hover {
+        background-color: #a0522d;
+        border-color: #a0522d;
+    }
+    .cart {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100%;
+        background-color: white;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        transition: right 0.3s ease;
+        z-index: 1000;
+    }
+    .cart.open {
+        right: 0;
+    }
+    .cart-header {
+        background-color: #8b4513;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+    }
+    .cart-body {
+        padding: 1rem;
+    }
+    .cart-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #8b4513;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-    <div class="container my-5">
-        <div class="row g-4 justify-content-center">
-            {% for product in products %}
-            <div class="col-md-3 col-6">
-                <div class="card h-100 text-center">
-                    <div class="card-img-top-wrapper">
-                        {% if product.image %}
-                            {% if product.image|slice:":9" == 'products/' %}
-                                <img src="{{ MEDIA_URL }}{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
-                            {% else %}
-                                <img src="{% static product.image %}" class="card-img-top" alt="{{ product.name }}">
-                            {% endif %}
+<div class="container my-5">
+    <div class="row g-4 justify-content-center">
+        {% for product in products %}
+        <div class="col-md-3 col-6">
+            {% if user.is_authenticated %}
+            <div class="card h-100 text-center">
+            {% else %}
+            <div class="card h-100 text-center" onclick="window.location.href='{% url 'login' %}?next={% url 'menu' %}'" style="cursor:pointer;">
+            {% endif %}
+                <div class="card-img-top-wrapper">
+                    {% if product.image %}
+                        {% if product.image|slice:":9" == 'products/' %}
+                            <img src="{{ MEDIA_URL }}{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
                         {% else %}
-                            <img src="{% static 'images/croissant.png' %}" class="card-img-top" alt="{{ product.name }}">
+                            <img src="{% static product.image %}" class="card-img-top" alt="{{ product.name }}">
                         {% endif %}
+                    {% else %}
+                        <img src="{% static 'images/croissant.png' %}" class="card-img-top" alt="{{ product.name }}">
+                    {% endif %}
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">PHP {{ product.price }}</p>
+                    <div class="input-group mb-3 mx-auto" style="max-width:150px;">
+                        <button class="input-group-text decrement-btn" onclick="decrement('qty_{{ product.id }}'); event.stopPropagation();">-</button>
+                        <input type="text" class="form-control text-center product_quantity bg-white" id="qty_{{ product.id }}" value="1">
+                        <button class="input-group-text increment-btn" onclick="increment('qty_{{ product.id }}'); event.stopPropagation();">+</button>
                     </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">PHP {{ product.price }}</p>
-                        <div class="input-group mb-3 mx-auto" id="qty" style="max-width: 150px;">
-                            <button class="input-group-text decrement-btn" onclick="decrement('qty_{{ product.id }}')">-</button>
-                            <input type="text" class="form-control text-center product_quantity bg-white" id="qty_{{ product.id }}" value="1">
-                            <button class="input-group-text increment-btn" onclick="increment('qty_{{ product.id }}')">+</button>
-                        </div>
-                        <button class="btn btn-primary w-100 mt-auto" onclick="addToCart('{{ product.name }}', {{ product.price }}, document.getElementById('qty_{{ product.id }}').value)">ADD TO CART</button>
-                    </div>
+                    <button class="btn btn-primary w-100 mt-auto"
+                        onclick="addToCart('{{ product.name }}', {{ product.price }}, document.getElementById('qty_{{ product.id }}').value, event)">
+                        ADD TO CART
+                    </button>
                 </div>
             </div>
-            {% empty %}
-            <p class="text-center">No products available yet.</p>
-            {% endfor %}
         </div>
-        
-        {% if page_obj.paginator.count > 16 %}
-        <div class="d-flex justify-content-center mt-4">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-                    {% endif %}
-                    <li class="page-item active"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
-                    {% if page_obj.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
+        {% empty %}
+        <p class="text-center">No products available yet.</p>
+        {% endfor %}
     </div>
 
-    <div class="cart">
-        <div class="cart-header">
-            <img src="{% static 'images/logoWhite.png' %}?v=2" alt="Dough Re Mi Patisserie Logo" style="height: 40px;">
-        </div>
-        <div class="cart-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                         <th>Price</th>
-                        <th>Quantity</th>
-                    </tr>
-                </thead>
-                <tbody id="cartItems"></tbody>
-            </table>
-            <div class="d-flex justify-content-between">
-                <strong>Total:</strong>
-                <span id="cartTotal">₱ 0.00</span>
-            </div>
-        </div>
-        <div class="cart-footer">
-            <button class="btn btn-light w-100 mb-2" id="checkOut">Checkout</button>
-            <button id="closeCart" class="btn btn-outline-light w-100">Close</button>
+    {% if page_obj.paginator.count > 16 %}
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item active"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<div class="cart">
+    <div class="cart-header">
+        <img src="{% static 'images/logoWhite.png' %}?v=2" alt="Dough Re Mi Patisserie Logo" style="height:40px;">
+    </div>
+    <div class="cart-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="cartItems"></tbody>
+        </table>
+        <div class="d-flex justify-content-between">
+            <strong>Total:</strong>
+            <span id="cartTotal">₱ 0.00</span>
         </div>
     </div>
+    <div class="cart-footer">
+        <button class="btn btn-light w-100 mb-2" id="checkOut">Checkout</button>
+        <button id="closeCart" class="btn btn-outline-light w-100">Close</button>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'scripts/menu.js' %}"></script>
-    <script>
-        function increment(inputId) {
-            const quantityInput = document.getElementById(inputId);
-            let quantity = parseInt(quantityInput.value);
-            if (!isNaN(quantity)) {
-                quantity++;
-                quantityInput.value = quantity;
-            }
-        }
-
-        function decrement(inputId) {
-            const quantityInput = document.getElementById(inputId);
-            let quantity = parseInt(quantityInput.value);
-            if (!isNaN(quantity) && quantity > 1) {
-                quantity--;
-                quantityInput.value = quantity;
-            }
-        }
-
-        // Add to cart is probably defined in menu.js, but let's override it or make sure it exists
-        // The original addToCart function didn't have quantity in all calls (e.g., Medium Baguette)
-        // We'll pass it properly now from Django's loop.
-        
-        // This is a setup for cart modal toggling
-        document.addEventListener('DOMContentLoaded', function() {
-            var openCartBtn = document.getElementById('openCart');
-            var cartEl = document.querySelector('.cart');
-            var closeCartBtn = document.getElementById('closeCart');
-            
-            if (openCartBtn && cartEl) {
-                openCartBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    cartEl.classList.add('open');
-                });
-            }
-            if (closeCartBtn && cartEl) {
-                closeCartBtn.addEventListener('click', function() {
-                    cartEl.classList.remove('open');
-                });
-            }
-            
-            var checkoutBtn = document.getElementById('checkOut');
-            if (checkoutBtn) {
-                checkoutBtn.addEventListener('click', function() {
-                    fetch("{% url 'checkout' %}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.location.href = "{% url 'delivery' %}";
-                        } else {
-                            alert(data.message || 'Error during checkout');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                    });
-                });
-            }
-        });
-    </script>
+<script>
+    /* Pass Django values to menu.js before it loads */
+    window.USER_AUTHENTICATED = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    window.CSRF_TOKEN = '{{ csrf_token }}';
+</script>
+<script src="{% static 'scripts/menu.js' %}?v=4"></script>
+<script>
+    function increment(inputId) {
+        var el = document.getElementById(inputId);
+        var qty = parseInt(el.value);
+        if (!isNaN(qty)) el.value = qty + 1;
+    }
+    function decrement(inputId) {
+        var el = document.getElementById(inputId);
+        var qty = parseInt(el.value);
+        if (!isNaN(qty) && qty > 1) el.value = qty - 1;
+    }
+</script>
 {% endblock %}

@@ -1,11 +1,13 @@
 import json
 import random
 import string
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
@@ -19,6 +21,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from bakery.models import Product, CartItem, Order, Receipt, UserProfile, AuditLog, MFACode
 from bakery.forms import SignUpForm, DeliveryForm, StaffCreateForm, StaffEditForm, ProductForm, OrderStatusForm, EmailChangeForm
 from bakery.decorators import staff_required, admin_required
+from bakery.signals import get_client_ip
+from bakery.utils import generate_captcha_svg
 
 # ============================================================================
 # 2FA Helper Functions
@@ -74,6 +78,14 @@ def create_mfa_code(user):
     send_mfa_code_via_email(user, code)
     return mfa_obj
 
+def captcha_image_view(request):
+    """Generates a random CAPTCHA code, saves it in session, and returns SVG image response."""
+    chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    code = "".join(random.choices(chars, k=5))
+    request.session['captcha_code'] = code
+    svg_content = generate_captcha_svg(code)
+    return HttpResponse(svg_content, content_type="image/svg+xml")
+
 def index_view(request):
     featured_products = Product.objects.all()[:3]
     gallery_products = Product.objects.all()[:6]
@@ -90,6 +102,30 @@ def signup_view(request):
         return redirect('index')
     
     if request.method == 'POST':
+        # Rate limiting: Check IP-based signup rate limit (max 5 attempts per 15 minutes)
+        client_ip = get_client_ip(request)
+        rate_limit_key = f'signup_rate_limit_{client_ip}'
+        attempts = cache.get(rate_limit_key, 0)
+
+        if attempts >= 5:
+            messages.error(request, "Too many signup attempts. Please try again later.")
+            return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
+
+        # Increment rate limit counter
+        cache.set(rate_limit_key, attempts + 1, 900)  # 15 minutes
+
+        # CAPTCHA validation
+        captcha_submitted = request.POST.get('captcha', '').strip().upper()
+        captcha_expected = request.session.get('captcha_code')
+
+        # Clear session CAPTCHA to prevent replay/reuse
+        if 'captcha_code' in request.session:
+            del request.session['captcha_code']
+
+        if not captcha_expected or captcha_submitted != captcha_expected:
+            messages.error(request, "Invalid CAPTCHA. Please try again.")
+            return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
+
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -136,6 +172,18 @@ def login_view(request):
 
     context = {}
     if request.method == 'POST':
+        # CAPTCHA validation
+        captcha_submitted = request.POST.get('captcha', '').strip().upper()
+        captcha_expected = request.session.get('captcha_code')
+
+        # Clear session CAPTCHA to prevent replay/reuse
+        if 'captcha_code' in request.session:
+            del request.session['captcha_code']
+
+        if not captcha_expected or captcha_submitted != captcha_expected:
+            messages.error(request, "Invalid CAPTCHA. Please try again.")
+            return render(request, 'login.html', context)
+
         email = request.POST.get('email')
         password = request.POST.get('password')
 
@@ -216,6 +264,7 @@ def logout_view(request):
         auth_logout(request)
     return redirect('index')
 
+@ensure_csrf_cookie
 def menu_view(request):
     products = Product.objects.filter(is_available=True)
     paginator = Paginator(products, 12)
@@ -247,12 +296,15 @@ def cart_add(request):
     try:
         data = json.loads(request.body)
         name = data.get('name')
+        quantity = int(data.get('quantity', 1))
         product = get_object_or_404(Product, name=name)
         
         cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
-        if not created:
-            cart_item.quantity += 1
-            cart_item.save()
+        if created:
+            cart_item.quantity = quantity
+        else:
+            cart_item.quantity += quantity
+        cart_item.save()
             
         return JsonResponse({'message': 'Item added to cart'})
     except Exception as e:
@@ -294,7 +346,7 @@ def checkout_view(request):
         
     request.session['checkout_session_id'] = session_id
     
-    total_price = 0.00
+    total_price = Decimal('0.00')
     for item in cart_items:
         subtotal = item.product.price * item.quantity
         total_price += subtotal
