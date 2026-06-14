@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dough Re Mi Patisserie - Order Successful{% endblock %}
+
+{% block extra_head %}
+    <style>
+        #order-success {
+            margin: auto;
+            padding: 20px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .success-container {
+            background-color: #fff;
+            border-radius: 15px;
+            margin-top: 3%;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: rgb(46, 33, 2);
+            margin-bottom: 20px;
+        }
+
+        .reference-number {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .reference-number .label {
+            font-size: 16px;
+            font-weight: normal;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .order-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .order-details h3 {
+            color: rgb(46, 33, 2);
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row .label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .detail-row .value {
+            color: #666;
+        }
+
+        .pickup-info {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .pickup-info h3 {
+            color: #155724;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .pickup-info ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .pickup-info li {
+            margin-bottom: 8px;
+            color: #155724;
+        }
+
+        .btn {
+            background-color: rgb(121, 65, 28);
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background-color: rgb(150, 80, 30);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section id="order-success">
+        <div class="success-container">
+            <div class="success-icon">✓</div>
+            <h2>Order Successful!</h2>
+            
+            <p>Your order has been successfully placed and payment has been verified.</p>
+            
+            <div class="reference-number">
+                <span class="label">Order Reference Number</span>
+                {{ receipt.reference_number }}
+            </div>
+
+            <div class="order-details">
+                <h3>Order Summary</h3>
+                {% for order in orders %}
+                    <div class="detail-row">
+                        <span class="label">{{ order.item_name }} x {{ orders|length }}</span>
+                        <span class="value">₱{{ order.item_price }}</span>
+                    </div>
+                {% endfor %}
+                <div class="detail-row" style="font-weight: bold; border-top: 2px solid #dee2e6; padding-top: 15px;">
+                    <span class="label">Total Packages</span>
+                    <span class="value">{{ orders|length }}</span>
+                </div>
+                <div class="detail-row" style="font-weight: bold;">
+                    <span class="label">Total Amount</span>
+                    <span class="value">₱{{ receipt.total_amount }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Payment Type</span>
+                    <span class="value">{% if receipt.payment_option == 'full' %}Full Payment (100%){% else %}Partial Payment (50% Down Payment){% endif %}</span>
+                </div>
+                <div class="detail-row" style="font-weight: bold; color: #28a745;">
+                    <span class="label">Amount Paid</span>
+                    <span class="value">₱{{ receipt.amount_paid }}</span>
+                </div>
+                {% if receipt.remaining_balance > 0 %}
+                    <div class="detail-row" style="color: #dc3545;">
+                        <span class="label">Remaining Balance</span>
+                        <span class="value">₱{{ receipt.remaining_balance }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="pickup-info">
+                <h3>Pickup Information</h3>
+                <ul>
+                    <li><strong>Pickup Availability Date:</strong> {{ receipt.pickup_availability_date|date:"F d, Y" }}</li>
+                    <li><strong>Store Hours:</strong> 9:00 AM to 7:00 PM</li>
+                    <li><strong>Customer Name:</strong> {{ receipt.full_name }}</li>
+                    <li><strong>Contact Number:</strong> {{ receipt.contact_number }}</li>
+                </ul>
+            </div>
+
+            <div class="pickup-info" style="background-color: #fff3cd; border-color: #ffc107;">
+                <h3 style="color: #856404;">Important Reminders</h3>
+                <ul>
+                    <li style="color: #856404;">A confirmation email has been sent to your registered email address</li>
+                    <li style="color: #856404;">Present your Order Reference Number during pickup</li>
+                    <li style="color: #856404;">Keep the confirmation email for verification purposes</li>
+                    <li style="color: #856404;">Bring a valid ID if requested</li>
+                </ul>
+            </div>
+
+            <div>
+                <a href="{% url 'menu' %}" class="btn">Continue Shopping</a>
+                <a href="{% url 'receipt' %}" class="btn btn-secondary">View Receipt</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

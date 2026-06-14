@@ -57,6 +57,53 @@ class DeliveryForm(forms.Form):
     postalCode = forms.IntegerField(required=True, label="Postal Code")
     paymentMethod = forms.ChoiceField(choices=PAYMENT_CHOICES, required=True, label="Payment Method")
 
+class PickupForm(forms.Form):
+    PAYMENT_METHOD_CHOICES = [
+        ('', 'Select a payment method'),
+        ('gcash', 'GCash'),
+        ('paymaya', 'PayMaya'),
+        ('card', 'Credit/Debit Card'),
+        ('grabpay', 'GrabPay'),
+    ]
+
+    PAYMENT_OPTION_CHOICES = [
+        ('full', 'Full Payment (100%)'),
+        ('partial', 'Partial Payment (50% Down Payment)'),
+    ]
+
+    full_name = forms.CharField(max_length=255, required=True, label="Full Name")
+    contact_number = forms.CharField(
+        max_length=11, 
+        required=True, 
+        label="Contact Number",
+        widget=forms.TextInput(attrs={
+            'type': 'tel',
+            'pattern': r'[0-9]*',
+            'inputmode': 'numeric',
+            'placeholder': '09XXXXXXXXX'
+        })
+    )
+    payment_method = forms.ChoiceField(choices=PAYMENT_METHOD_CHOICES, required=True, label="Payment Method")
+    payment_option = forms.ChoiceField(choices=PAYMENT_OPTION_CHOICES, required=True, label="Payment Option")
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            # Auto-populate full name from user profile
+            if user.first_name or user.last_name:
+                self.fields['full_name'].initial = f"{user.first_name} {user.last_name}".strip()
+            # Auto-populate contact number from user profile
+            if hasattr(user, 'profile') and user.profile.contactnumber:
+                self.fields['contact_number'].initial = user.profile.contactnumber
+
+    def clean_contact_number(self):
+        contact_number = self.cleaned_data.get('contact_number')
+        # Validate Philippine mobile number format
+        if not re.match(r'^09\d{9}$', contact_number):
+            raise ValidationError("Contact number must be a valid Philippine mobile number (09XXXXXXXXX).")
+        return contact_number
+
 class StaffCreateForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email Address")
     password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Password")

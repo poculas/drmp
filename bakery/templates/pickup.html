@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dough Re Mi Patisserie - Checkout{% endblock %}
+
+{% block extra_head %}
+    <style>
+        #checkout-info {
+            margin: auto;
+            padding: 20px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .checkout-container {
+            background-color: #fff;
+            border-radius: 15px;
+            margin-top: 3%;
+            padding: 30px 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: rgb(46, 33, 2);
+            margin-bottom: 20px;
+        }
+
+        .notice-section {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .notice-section h3 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .notice-section h4 {
+            color: #856404;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .notice-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .notice-section li {
+            margin-bottom: 5px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .order-summary {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .order-summary h3 {
+            color: rgb(46, 33, 2);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .total-container {
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: rgb(46, 33, 2);
+            font-size: 18px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+
+        .payment-amount {
+            text-align: center;
+            font-weight: bold;
+            color: rgb(121, 65, 28);
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-radius: 5px;
+            border: 2px solid #ffc107;
+        }
+
+        .pay-btn {
+            background-color: rgb(121, 65, 28);
+            color: #fff;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .pay-btn:hover {
+            background-color: rgb(150, 80, 30);
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section id="checkout-info">
+        <div class="checkout-container">
+            <h2>Checkout</h2>
+            
+            <div class="notice-section">
+                <h3>Important Note</h3>
+                <ul>
+                    <li>This store operates <b>PICK UP ONLY</b></li>
+                    <li>You may choose to pay 100% or 50% of the total amount <b>NOW</b>, and settle the remaining fees upon pickup</li>
+                    <li>Orders are processed only <b>AFTER SUCCESSFUL</b> payment</li>
+                    <li>You will receive a confirmation email containing the reference number, <b>PLEASE PRESENT THE EMAIL</b> during pickup for verification</li>
+                </ul>
+
+                <h4>Pickup Schedule</h4>
+                <ul>
+                    <li>Orders will be available for pickup <b>AFTER THREE (3) DAYS</b> of successful payment confirmation</li>
+                    <li>Customers may visit the store <b>DURING</b> operating hours: 9:00 AM to 7:00 PM</li>
+                </ul>
+            </div>
+
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                {% for order in orders %}
+                    <div class="order-item">
+                        <span>{{ order.item_name }} x {{ orders|length }}</span>
+                        <span>₱{{ order.item_price }}</span>
+                    </div>
+                {% endfor %}
+                <div class="order-item" style="font-weight: bold; border-top: 2px solid #dee2e6; padding-top: 10px;">
+                    <span>Total Packages: {{ orders|length }}</span>
+                    <span>Grand Total: ₱{{ total_price }}</span>
+                </div>
+            </div>
+
+            <div class="total-container">
+                <p id="cartTotal">GRAND TOTAL: ₱{{ total_price }}</p>
+            </div>
+
+            <form id="checkout" action="{% url 'pickup' %}" method="POST">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="payment-amount" id="paymentAmount">
+                    Amount to Pay: ₱{{ total_price }}
+                </div>
+
+                <button type="submit" class="pay-btn" id="payNow" name="payNow">PROCEED TO PAYMENT</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // Update payment amount based on payment option selection
+        document.getElementById('id_payment_option').addEventListener('change', function() {
+            const totalAmount = {{ total_price }};
+            const paymentOption = this.value;
+            const paymentAmountDiv = document.getElementById('paymentAmount');
+            
+            if (paymentOption === 'full') {
+                paymentAmountDiv.textContent = 'Amount to Pay: ₱' + totalAmount.toFixed(2);
+            } else if (paymentOption === 'partial') {
+                const partialAmount = totalAmount * 0.5;
+                paymentAmountDiv.textContent = 'Amount to Pay: ₱' + partialAmount.toFixed(2) + ' (50% Down Payment)';
+            } else {
+                paymentAmountDiv.textContent = 'Amount to Pay: ₱' + totalAmount.toFixed(2);
+            }
+        });
+    </script>
+{% endblock %}

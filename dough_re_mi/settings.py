@@ -12,6 +12,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-mu@bhbfhm@ybcy=t1_(-)+0-3n%4sqe)a2v(x!hz_cmz=)k2pm')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+# Add ngrok URL for testing
+if 'booth-acetone-clumsy.ngrok-free.dev' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('booth-acetone-clumsy.ngrok-free.dev')
+
+# CSRF Trusted Origins for ngrok
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://booth-acetone-clumsy.ngrok-free.dev'
+]
+
+# CSRF Cookie Settings
+CSRF_COOKIE_SECURE = False  # Allow non-HTTPS for development
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Site ID required by django-allauth
 SITE_ID = 1
@@ -124,6 +139,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'bakery' / 'static',
+    BASE_DIR / 'images',  # Add project root images folder
 ]
 
 # Media files (User uploaded content)
@@ -179,3 +195,19 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+# PayMongo Payment Gateway Configuration
+PAYMONGO_PUBLIC_KEY = os.getenv('PAYMONGO_PUBLIC_KEY', '')
+PAYMONGO_SECRET_KEY = os.getenv('PAYMONGO_SECRET_KEY', '')
+PAYMONGO_API_URL = 'https://api.paymongo.com/v1'
+PAYMONGO_WEBHOOK_SECRET = os.getenv('PAYMONGO_WEBHOOK_SECRET', '')
+BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@je-cole-bakery.com')

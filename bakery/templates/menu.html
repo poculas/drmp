@@ -113,7 +113,7 @@
 
     <div class="cart">
         <div class="cart-header">
-            <img src="{% static 'images/logoWhite.png' %}?v=2" alt="Dough Re Mi Patisserie Logo" style="height: 40px;">
+            <img src="{% static 'images/newlogo.png' %}" alt="Dough Re Mi Patisserie Logo" style="height: 40px;">
         </div>
         <div class="cart-body">
             <table class="table">
@@ -140,6 +140,10 @@
 
 {% block extra_js %}
     <script src="{% static 'scripts/menu.js' %}"></script>
+    <script>
+        // Set user authentication status for JavaScript
+        window.isUserLoggedIn = {{ user.is_authenticated|lower }};
+    </script>
     <script>
         function increment(inputId) {
             const quantityInput = document.getElementById(inputId);

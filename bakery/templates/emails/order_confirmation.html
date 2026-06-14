@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Dough Re Mi Patisserie</title>
+    <style>
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', 'Calibri', 'Trebuchet MS', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: rgb(46, 33, 2);
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .reference-number {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .reference-number .label {
+            font-size: 14px;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        .reference-number .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #856404;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .section h2 {
+            color: rgb(46, 33, 2);
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgb(121, 65, 28);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-row .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .info-row .value {
+            color: #666;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item .name {
+            flex: 1;
+        }
+        .order-item .quantity {
+            flex: 0 0 80px;
+            text-align: center;
+        }
+        .order-item .price {
+            flex: 0 0 100px;
+            text-align: right;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-top: 2px solid rgb(121, 65, 28);
+            font-weight: bold;
+            font-size: 16px;
+            color: rgb(46, 33, 2);
+        }
+        .pickup-info {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .pickup-info h3 {
+            color: #155724;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .pickup-info ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #155724;
+        }
+        .pickup-info li {
+            margin-bottom: 8px;
+        }
+        .payment-info {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .payment-info h3 {
+            color: #856404;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .payment-info .status {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .footer {
+            background-color: rgb(46, 33, 2);
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .footer p {
+            margin: 5px 0;
+            opacity: 0.8;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .info-row,
+            .order-item {
+                flex-direction: column;
+            }
+            .order-item .quantity,
+            .order-item .price {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Dough Re Mi Patisserie</h1>
+            <p>Order Confirmation</p>
+        </div>
+        
+        <div class="content">
+            <div class="reference-number">
+                <div class="label">ORDER REFERENCE NUMBER</div>
+                <div class="number">{{ receipt.reference_number }}</div>
+            </div>
+
+            <div class="section">
+                <h2>Order Information</h2>
+                <div class="info-row">
+                    <span class="label">Customer Name:</span>
+                    <span class="value">{{ receipt.full_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Order Date:</span>
+                    <span class="value">{{ receipt.order_date|date:"F d, Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Payment Status:</span>
+                    <span class="value" style="color: #28a745; font-weight: bold;">PAID</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Payment Type:</span>
+                    <span class="value">{% if receipt.payment_option == 'full' %}Full Payment (100%){% else %}Partial Payment (50% Down Payment){% endif %}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Amount Paid:</span>
+                    <span class="value">₱{{ receipt.amount_paid }}</span>
+                </div>
+                {% if receipt.remaining_balance > 0 %}
+                <div class="info-row">
+                    <span class="label">Remaining Balance:</span>
+                    <span class="value" style="color: #dc3545;">₱{{ receipt.remaining_balance }}</span>
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <span class="label">Pickup Availability Date:</span>
+                    <span class="value">{{ receipt.pickup_availability_date|date:"F d, Y" }}</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Order Summary</h2>
+                {% for order in orders %}
+                <div class="order-item">
+                    <span class="name">{{ order.item_name }}</span>
+                    <span class="quantity">x{{ orders|length }}</span>
+                    <span class="price">₱{{ order.item_price }}</span>
+                </div>
+                {% endfor %}
+                <div class="info-row">
+                    <span class="label">Total Packages:</span>
+                    <span class="value">{{ orders|length }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Grand Total:</span>
+                    <span>₱{{ receipt.total_amount }}</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Customer Information</h2>
+                <div class="info-row">
+                    <span class="label">Full Name:</span>
+                    <span class="value">{{ receipt.full_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Contact Number:</span>
+                    <span class="value">{{ receipt.contact_number }}</span>
+                </div>
+            </div>
+
+            <div class="pickup-info">
+                <h2>Pickup Instructions</h2>
+                <ul>
+                    <li>Orders may be picked up three (3) days after successful payment</li>
+                    <li>Store operating hours are from 9:00 AM to 7:00 PM</li>
+                    <li>Present your Order Reference Number upon pickup</li>
+                    <li>Keep this confirmation email accessible for verification</li>
+                    <li>Bring a valid ID if requested</li>
+                </ul>
+            </div>
+
+            <div class="payment-info">
+                <h3>Payment Summary</h3>
+                <div class="status">Payment Verified Successfully</div>
+                <p style="margin: 10px 0 0 0; color: #856404;">
+                    Your payment has been verified through PayMongo. A receipt of this transaction has been generated.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>For inquiries, please contact us at:</p>
+            <p>Email: noreply@je-cole-bakery.com</p>
+            <p>Thank you for your order!</p>
+        </div>
+    </div>
+</body>
+</html>

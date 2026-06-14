@@ -9,8 +9,12 @@ urlpatterns = [
     path('login.php', views.login_view, name='login'),
     path('logout.php', views.logout_view, name='logout'),
     path('menu.php', views.menu_view, name='menu'),
-    path('delivery.php', views.delivery_view, name='delivery'),
+    path('pickup.php', views.pickup_view, name='pickup'),
+    path('delivery.php', views.pickup_view, name='delivery'),
+    path('payment-success.php', views.payment_success_view, name='payment_success'),
+    path('order-success.php', views.order_success_view, name='order_success'),
     path('receipt.php', views.receipt_view, name='receipt'),
+    path('webhook/paymongo/', views.paymongo_webhook_view, name='paymongo_webhook'),
     path('set-password.php', views.set_password_view, name='set_password'),
     
     # Staff Dashboard Routes
@@ -31,6 +35,7 @@ urlpatterns = [
     # Cart AJAX APIs mapped to match legacy PHP requests
     path('add-to-cart.php', views.cart_add, name='cart_add'),
     path('remove-from-cart.php', views.cart_remove, name='cart_remove'),
+    path('update-cart-quantity.php', views.cart_update_quantity, name='cart_update_quantity'),
     path('get-cart.php', views.cart_get, name='cart_get'),
     path('checkout.php', views.checkout_view, name='checkout'),
 ]
