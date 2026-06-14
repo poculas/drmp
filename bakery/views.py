@@ -342,13 +342,28 @@ def checkout_view(request):
     
     # Validation constants
     MAX_PER_PRODUCT = 5
+    MAX_TOTAL_QUANTITY = 15
     ORDER_COOLDOWN_MINUTES = 5
     MAX_DAILY_ORDERS = 3
     
-    # Order cooldown validation
-    last_order = Order.objects.filter(user=request.user).order_by('-ordered_at').first()
-    if last_order:
-        time_since_last_order = timezone.now() - last_order.ordered_at
+    # Total quantity validation
+    total_quantity = sum(item.quantity for item in cart_items)
+    if total_quantity > MAX_TOTAL_QUANTITY:
+        AuditLog.objects.create(
+            user=request.user,
+            action='total_quantity_limit_failed',
+            description=f"Checkout failed: Total quantity {total_quantity} exceeds maximum {MAX_TOTAL_QUANTITY}",
+            ip_address=request.META.get('REMOTE_ADDR')
+        )
+        return JsonResponse({'success': False, 'message': f'Total quantity cannot exceed {MAX_TOTAL_QUANTITY} items'}, status=400)
+    
+    # Order cooldown validation (only for successfully paid orders)
+    last_paid_order = Order.objects.filter(
+        user=request.user,
+        status__in=['processing', 'claimed']  # Successfully paid orders
+    ).order_by('-ordered_at').first()
+    if last_paid_order:
+        time_since_last_order = timezone.now() - last_paid_order.ordered_at
         if time_since_last_order < timedelta(minutes=ORDER_COOLDOWN_MINUTES):
             remaining_minutes = ORDER_COOLDOWN_MINUTES - (time_since_last_order.seconds // 60)
             AuditLog.objects.create(
