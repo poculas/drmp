@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 
 # Load environment variables from .env file
 load_dotenv()
@@ -10,15 +11,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-mu@bhbfhm@ybcy=t1_(-)+0-3n%4sqe)a2v(x!hz_cmz=)k2pm')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# ALLOWED_HOSTS - support Render domains and local development
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
+# Automatically add Render domain if detected
+if os.getenv('RENDER'):
+    render_service_url = os.getenv('RENDER_EXTERNAL_URL', '').replace('https://', '').replace('http://', '')
+    if render_service_url and render_service_url not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(render_service_url)
 
 # CSRF Trusted Origins - use environment variable for production
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000').split(',')
 
+# Automatically add Render domain to CSRF trusted origins if detected
+if os.getenv('RENDER'):
+    render_external_url = os.getenv('RENDER_EXTERNAL_URL', '')
+    if render_external_url and render_external_url not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_external_url)
+
 # CSRF Cookie Settings
-CSRF_COOKIE_SECURE = False  # Allow non-HTTPS for development
-CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = not DEBUG  # Secure cookies in production
+CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Site ID required by django-allauth
@@ -47,6 +62,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,25 +97,23 @@ WSGI_APPLICATION = 'dough_re_mi.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Database configuration - supports both SQLite and PostgreSQL
-# For Render, use PostgreSQL via environment variables
-DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
-DB_NAME = os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3')
-DB_USER = os.getenv('DB_USER', '')
-DB_PASSWORD = os.getenv('DB_PASSWORD', '')
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = os.getenv('DB_PORT', '5432')
-
-DATABASES = {
-    'default': {
-        'ENGINE': DB_ENGINE,
-        'NAME': DB_NAME,
-        'USER': DB_USER if DB_ENGINE == 'django.db.backends.postgresql' else '',
-        'PASSWORD': DB_PASSWORD if DB_ENGINE == 'django.db.backends.postgresql' else '',
-        'HOST': DB_HOST if DB_ENGINE == 'django.db.backends.postgresql' else '',
-        'PORT': DB_PORT if DB_ENGINE == 'django.db.backends.postgresql' else '',
+# Database configuration - use PostgreSQL via DATABASE_URL on Render, SQLite for local development
+if os.getenv('DATABASE_URL'):
+    # Render or production environment with PostgreSQL
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # Local development with SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -130,7 +144,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = os.getenv('STATIC_URL', 'static/')
+STATIC_URL = os.getenv('STATIC_URL', '/static/')
 STATICFILES_DIRS = [
     BASE_DIR / 'bakery' / 'static',
     BASE_DIR / 'images',  # Add project root images folder
@@ -138,6 +152,11 @@ STATICFILES_DIRS = [
 
 # Static root for production (collectstatic)
 STATIC_ROOT = Path(os.getenv('STATIC_ROOT', BASE_DIR / 'staticfiles'))
+
+# WhiteNoise configuration for static file serving
+WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh static files in development
 
 # Media files (User uploaded content)
 # For Render, media files should be served through cloud storage or similar
@@ -157,11 +176,12 @@ LOGOUT_REDIRECT_URL = 'index'
 SESSION_COOKIE_AGE = 1800  # 30 minutes (in seconds)
 SESSION_SAVE_EVERY_REQUEST = True  # Refresh session expiry on every request (inactivity timeout)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Clear session when browser is closed
+SESSION_COOKIE_SECURE = not DEBUG  # Secure cookies in production
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # HTTPS Enforcement & Security Headers Only enforce strict HTTPS redirect and secure cookies in production (non-DEBUG)
 SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True' if not DEBUG else False
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
 
 # HTTP Strict Transport Security (HSTS) settings
 if not DEBUG:

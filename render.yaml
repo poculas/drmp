@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: dough-re-mi-patisserie
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn dough_re_mi.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: dough_re_mi.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dough-re-mi-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://.onrender.com
+
+databases:
+  - name: dough-re-mi-db
+    databaseName: dough_re_mi
+    user: dough_re_mi_user
