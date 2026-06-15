@@ -139,5 +139,17 @@
 2026-06-15 18:08:23,592 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: bitejb6@gmail.com
 2026-06-15 18:08:38,158 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: bitejb6@gmail.com | Reason: Incorrect code submitted
 2026-06-15 18:08:55,730 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: bitejb6@gmail.com
-2026-06-15 14:00:59,487 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
-2026-06-15 14:03:52,302 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 21:55:41,517 [INFO] security - SIGNUP_SUCCESS | IP: 127.0.0.1 | User: ryanalexander01@gmail.com
+2026-06-15 21:55:42,152 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: ryanalexander01@gmail.com (Auto-login after signup)
+2026-06-15 21:58:12,918 [INFO] security - LOGOUT | User: ryanalexander01@gmail.com
+2026-06-15 21:59:50,759 [INFO] security - SIGNUP_SUCCESS | IP: 127.0.0.1 | User: ryanalexander01@gmail.com
+2026-06-15 21:59:51,522 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: ryanalexander01@gmail.com (Auto-login after signup)
+2026-06-15 22:00:46,077 [INFO] security - MFA_TOGGLED | User: ryanalexander01@gmail.com | Enabled: True
+2026-06-15 22:00:54,202 [INFO] security - LOGOUT | User: ryanalexander01@gmail.com
+2026-06-15 22:01:17,567 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: ryanalexander01@gmail.com
+2026-06-15 22:02:33,552 [INFO] security - LOGOUT | User: 
+2026-06-15 22:02:54,707 [INFO] security - SIGNUP_SUCCESS | IP: 127.0.0.1 | User: poculas.nna@gmail.com
+2026-06-15 22:02:55,497 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: poculas.nna@gmail.com (Auto-login after signup)
+2026-06-15 22:03:00,693 [INFO] security - MFA_TOGGLED | User: poculas.nna@gmail.com | Enabled: True
+2026-06-15 22:03:02,450 [INFO] security - LOGOUT | User: poculas.nna@gmail.com
+2026-06-15 22:03:19,169 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: poculas.nna@gmail.com
