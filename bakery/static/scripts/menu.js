@@ -22,7 +22,7 @@ function getCsrfToken() {
     return '';
 }
 
-// Function to show notification popup
+// Function to show notification popup (floating at top-right)
 function showNotification(message, type = 'success') {
     // Remove existing notification if any
     const existingNotification = document.querySelector('.notification-popup');
@@ -34,23 +34,26 @@ function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = 'notification-popup';
     notification.textContent = message;
+    notification.setAttribute('data-position', 'top-right');
 
     // Set color based on type
     if (type === 'success') {
         notification.style.backgroundColor = '#28a745';
     } else if (type === 'error') {
         notification.style.backgroundColor = '#dc3545';
-    } else {
+    } else if (type === 'warning') {
+        notification.style.backgroundColor = '#ffc107';
+    } else if (type === 'info') {
         notification.style.backgroundColor = '#17a2b8';
     }
 
     // Add to body
     document.body.appendChild(notification);
 
-    // Remove after 3 seconds
+    // Remove after 6 seconds
     setTimeout(() => {
         notification.remove();
-    }, 3000);
+    }, 6000);
 }
 
 // ── Add item to cart ──────────────────────────────────────────────────────────

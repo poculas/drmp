@@ -139,3 +139,5 @@
 2026-06-15 18:08:23,592 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: bitejb6@gmail.com
 2026-06-15 18:08:38,158 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: bitejb6@gmail.com | Reason: Incorrect code submitted
 2026-06-15 18:08:55,730 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 14:00:59,487 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 14:03:52,302 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
