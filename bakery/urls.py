@@ -23,7 +23,7 @@ urlpatterns = [
     path('orders/<str:order_reference>/', views.order_detail_view, name='order_detail'),
     path('change-password.php', views.change_password_view, name='change_password'),
     path('change-email.php', views.change_email_view, name='change_email'),
-    
+    path('link-account.php', views.link_account_prompt, name='link_account_prompt'),
     # Staff Dashboard Routes
     path('staff/dashboard/', views.staff_dashboard, name='staff_dashboard'),
     path('staff/products/', views.staff_products, name='staff_products'),

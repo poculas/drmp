@@ -2,6 +2,10 @@ import json
 import logging
 import random
 import string
+
+from allauth.socialaccount.models import SocialLogin
+from allauth.socialaccount.helpers import complete_social_login
+
 from collections import defaultdict
 from decimal import Decimal
 
@@ -34,6 +38,38 @@ from bakery.paymongo_utils import create_paymongo_checkout, verify_paymongo_paym
 from bakery.decorators import staff_required, admin_required
 from bakery.signals import get_client_ip
 from bakery.utils import generate_captcha_svg
+
+def link_account_prompt(request):
+    """Show prompt asking user to confirm linking their Google account."""
+    email = request.session.get('link_email')
+    if not email:
+        return redirect('login')
+
+    if request.method == 'POST':
+        if 'confirm' in request.POST:
+            # User confirmed — deserialize and complete the social login
+            serialized = request.session.get('pending_sociallogin')
+            if serialized:
+                sociallogin = SocialLogin.deserialize(serialized)
+                # Connect to existing user
+                try:
+                    existing_user = User.objects.get(email__iexact=email)
+                    sociallogin.connect(request, existing_user)
+                    from django.contrib.auth import login as auth_login
+                    auth_login(request, existing_user,
+                               backend='allauth.account.auth_backends.AuthenticationBackend')
+                    # Clean up session
+                    del request.session['pending_sociallogin']
+                    del request.session['link_email']
+                    return redirect('index')
+                except User.DoesNotExist:
+                    pass
+        # User declined — redirect to login
+        request.session.pop('pending_sociallogin', None)
+        request.session.pop('link_email', None)
+        return redirect('login')
+
+    return render(request, 'link_account_prompt.html', {'email': email})
 
 # ============================================================================
 # 2FA Helper Functions

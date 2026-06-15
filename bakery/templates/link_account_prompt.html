@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dough Re Mi Patisserie - Link Account{% endblock %}
+
+{% block content %}
+<section>
+    <div class="registration">
+        <h1>Link Google Account</h1>
+        <p>An account with <strong>{{ email }}</strong> already exists.</p>
+        <p>Do you want to link your Google account so you can sign in with either method?</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" name="confirm" class="btn btn-primary w-100" style="margin-bottom: 12px;">
+                <h3>Yes, link my Google account</h3>
+            </button>
+            <button type="submit" name="decline" class="btn btn-outline-secondary w-100">
+                <h3>No, go back to login</h3>
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
