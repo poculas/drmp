@@ -343,3 +343,6 @@ if not os.getenv('RENDER'):
     LOGGING['loggers']['security']['handlers'] = ['security_file', 'console']
     LOGGING['loggers']['django.security']['handlers'] = ['security_file', 'console']
     LOGGING['loggers']['django.request']['handlers'] = ['error_file', 'console']
+
+# Compatibility shim for django-cloudinary-storage 0.3.0 bug with Django 5.x
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
