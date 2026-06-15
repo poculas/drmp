@@ -200,10 +200,12 @@ def signup_view(request):
             user.username = form.cleaned_data['email']  # Use email as username
             user.save()
             
-            UserProfile.objects.create(
+            UserProfile.objects.get_or_create(
                 user=user,
-                contactnumber=form.cleaned_data['contactnumber'],
-                role='customer'  # Set default role to customer
+                defaults={
+                    'contactnumber': form.cleaned_data['contactnumber'],
+                    'role': 'customer'  # Set default role to customer
+                }
             )
             
             logger.info(f"SIGNUP_SUCCESS | IP: {client_ip} | User: {user.email}")
