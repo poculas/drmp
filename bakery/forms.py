@@ -45,14 +45,30 @@ class SignUpForm(forms.ModelForm):
             raise ValidationError("Email is already registered.")
         return email
 
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if not password:
+            raise ValidationError("Password is required.")
+        if len(password) < 8:
+            raise ValidationError("Password must be at least 8 characters long.")
+        if not re.search(r'[A-Z]', password):
+            raise ValidationError("Password must contain at least one uppercase letter.")
+        if not re.search(r'[a-z]', password):
+            raise ValidationError("Password must contain at least one lowercase letter.")
+        if not re.search(r'[0-9]', password):
+            raise ValidationError("Password must contain at least one number.")
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            raise ValidationError("Password must contain at least one special character.")
+        return password
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
-
         if password and confirm_password and password != confirm_password:
             self.add_error('confirm_password', "Passwords do not match. Please enter matching passwords.")
         return cleaned_data
+
 
 class DeliveryForm(forms.Form):
     PAYMENT_CHOICES = [
@@ -82,6 +98,7 @@ class DeliveryForm(forms.Form):
             raise ValidationError("Postal code must be a positive integer.")
         return postal_code
 
+
 class PickupForm(forms.Form):
     PAYMENT_METHOD_CHOICES = [
         ('', 'Select a payment method'),
@@ -98,8 +115,8 @@ class PickupForm(forms.Form):
 
     full_name = forms.CharField(max_length=255, required=True, label="Full Name")
     contact_number = forms.CharField(
-        max_length=11, 
-        required=True, 
+        max_length=11,
+        required=True,
         label="Contact Number",
         widget=forms.TextInput(attrs={
             'type': 'tel',
@@ -115,47 +132,44 @@ class PickupForm(forms.Form):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user:
-            # Auto-populate full name from user profile
             if user.first_name or user.last_name:
                 self.fields['full_name'].initial = f"{user.first_name} {user.last_name}".strip()
-            # Auto-populate contact number from user profile
             if hasattr(user, 'profile') and user.profile.contactnumber:
                 self.fields['contact_number'].initial = user.profile.contactnumber
 
     def clean_contact_number(self):
         contact_number = self.cleaned_data.get('contact_number')
-        # Validate Philippine mobile number format
         if not re.match(r'^09\d{9}$', contact_number):
             raise ValidationError("Contact number must be a valid Philippine mobile number (09XXXXXXXXX).")
         return contact_number
 
+
 class StaffCreateForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email Address")
     password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Password")
-    
+
     class Meta:
         model = User
         fields = ['email']
-    
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise ValidationError("Email is already registered.")
         return email
-    
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
         user.username = self.cleaned_data['email']
         if commit:
             user.save()
-            # Create UserProfile with staff role
-            UserProfile.objects.create(
+            UserProfile.objects.get_or_create(
                 user=user,
-                role='staff',
-                is_active=True
+                defaults={'role': 'staff', 'is_active': True}
             )
         return user
+
 
 class StaffEditForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50, required=True, label="First Name")
@@ -163,43 +177,41 @@ class StaffEditForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email Address")
     contactnumber = forms.CharField(max_length=11, required=True, label="Phone Number")
     is_active = forms.BooleanField(required=False, label="Active")
-    
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and hasattr(self.instance, 'profile'):
             self.fields['contactnumber'].initial = self.instance.profile.contactnumber
             self.fields['is_active'].initial = self.instance.profile.is_active
-    
+
     def clean_contactnumber(self):
         contactnumber = self.cleaned_data.get('contactnumber')
         if not re.match(r'^\d{11}$', contactnumber):
             raise ValidationError("Phone number must be exactly 11 digits.")
-        # Check if phone number is already registered by another user
         if UserProfile.objects.filter(contactnumber=contactnumber).exclude(user=self.instance).exists():
             raise ValidationError("Phone number is already registered.")
         return contactnumber
-    
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # Check if email is already registered by another user
         if User.objects.filter(email=email).exclude(id=self.instance.id).exists():
             raise ValidationError("Email is already registered.")
         return email
-    
+
     def save(self, commit=True):
         user = super().save(commit=False)
         if commit:
             user.save()
-            # Update UserProfile
             profile = user.profile
             profile.contactnumber = self.cleaned_data['contactnumber']
             profile.is_active = self.cleaned_data['is_active']
             profile.save()
         return user
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -220,6 +232,7 @@ class ProductForm(forms.ModelForm):
             if image.size > 3 * 1024 * 1024:
                 raise ValidationError("Image file size must be no more than 3MB.")
         return image
+
 
 class OrderStatusForm(forms.ModelForm):
     class Meta:
