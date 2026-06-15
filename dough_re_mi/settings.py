@@ -136,8 +136,7 @@ USE_TZ = True
 
 STATIC_URL = os.getenv('STATIC_URL', '/static/')
 STATICFILES_DIRS = [
-    BASE_DIR / 'bakery' / 'static',
-    BASE_DIR / 'images',  # Add project root images folder
+    BASE_DIR / 'bakery' / 'static'
 ]
 
 STORAGES = {
@@ -145,7 +144,7 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
@@ -344,5 +343,4 @@ if not os.getenv('RENDER'):
     LOGGING['loggers']['django.security']['handlers'] = ['security_file', 'console']
     LOGGING['loggers']['django.request']['handlers'] = ['error_file', 'console']
 
-# Compatibility shim for django-cloudinary-storage 0.3.0 bug with Django 5.x
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
