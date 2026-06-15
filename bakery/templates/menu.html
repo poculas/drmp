@@ -71,11 +71,15 @@
             {% endif %}
                 <div class="card-img-top-wrapper">
                     {% if product.image %}
-                        {% if product.image|slice:":9" == 'products/' %}
-                            <img src="{{ MEDIA_URL }}{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
-                        {% else %}
-                            <img src="{% static product.image %}" class="card-img-top" alt="{{ product.name }}">
-                        {% endif %}
+                        {% with image_str=product.image|stringformat:"s" %}
+                            {% if "https://" in image_str or "http://" in image_str %}
+                                <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
+                            {% elif "products/" in image_str %}
+                                <img src="{{ MEDIA_URL }}{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
+                            {% else %}
+                                <img src="{% static product.image %}" class="card-img-top" alt="{{ product.name }}">
+                            {% endif %}
+                        {% endwith %}
                     {% else %}
                         <img src="{% static 'images/croissant.png' %}" class="card-img-top" alt="{{ product.name }}">
                     {% endif %}
