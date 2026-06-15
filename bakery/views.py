@@ -821,7 +821,7 @@ def payment_success_view(request):
             request.session.pop('checkout_id', None)
             request.session.pop('checkout_info', None)
             
-            return redirect('order_success')
+            return redirect('menu')
             
         except Exception as e:
             messages.error(request, f"Error processing order: {str(e)}")

@@ -82,3 +82,4 @@
 2026-06-15 13:25:47,998 [WARNING] django.security.csrf - Forbidden (CSRF token from the 'X-Csrftoken' HTTP header has incorrect length.): /add-to-cart.php
 2026-06-15 13:42:11,924 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: rochelle | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
 2026-06-15 13:42:12,494 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: rochelle | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 13:47:09,066 [INFO] security - LOGOUT | User: poculas.nna@gmail.com

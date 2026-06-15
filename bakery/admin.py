@@ -16,20 +16,14 @@ class UserAdmin(BaseUserAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'contactnumber', 'role', 'is_active')
-    list_filter = ('role', 'is_active')
-    search_fields = ('user__username', 'user__email', 'contactnumber')
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'price', 'stock', 'is_available')
-    list_filter = ('is_available',)
-    search_fields = ('name',)
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'item_name', 'item_price', 'status', 'ordered_at')
-    list_filter = ('status', 'ordered_at')
-    search_fields = ('user__username', 'user__email', 'item_name')
 
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
@@ -42,15 +36,11 @@ class ReceiptAdmin(admin.ModelAdmin):
 @admin.register(UserActivity)
 class UserActivityAdmin(admin.ModelAdmin):
     list_display = ('user', 'activity_type', 'timestamp', 'ip_address')
-    list_filter = ('activity_type', 'timestamp')
-    search_fields = ('user__username', 'user__email', 'ip_address')
     readonly_fields = ('timestamp',)
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ('user', 'action', 'description', 'timestamp', 'ip_address')
-    list_filter = ('action', 'timestamp')
-    search_fields = ('user__username', 'description')
+    list_display = ('id', 'user', 'action', 'timestamp')
     readonly_fields = ('timestamp',)
 
 # Re-register User admin
