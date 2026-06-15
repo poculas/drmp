@@ -139,66 +139,63 @@ def signup_view(request):
         return redirect('index')
     
     if request.method == 'POST':
-        # Rate limiting: Check IP-based signup rate limit (max 5 attempts per 15 minutes)
         client_ip = get_client_ip(request)
+
+        # Rate limiting
         rate_limit_key = f'signup_rate_limit_{client_ip}'
         attempts = cache.get(rate_limit_key, 0)
-
         if attempts >= 5:
             messages.error(request, "Too many signup attempts. Please try again later.")
             logger.warning(f"SIGNUP_RATE_LIMIT | IP: {client_ip} | Attempts: {attempts}")
             return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
-
-        # Increment rate limit counter
-        cache.set(rate_limit_key, attempts + 1, 900)  # 15 minutes
+        cache.set(rate_limit_key, attempts + 1, 900)
 
         # CAPTCHA validation
         captcha_submitted = request.POST.get('captcha', '').strip().upper()
         captcha_expected = request.session.get('captcha_code')
-
-        # Clear session CAPTCHA to prevent replay/reuse
         if 'captcha_code' in request.session:
             del request.session['captcha_code']
-
         if not captcha_expected or captcha_submitted != captcha_expected:
             messages.error(request, "Invalid CAPTCHA. Please try again.")
-            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA | Expected: {captcha_expected}, Submitted: {captcha_submitted}")
+            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA")
             return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
 
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
-            user.username = form.cleaned_data['email']  # Use email as username
+            user.username = form.cleaned_data['email']
             user.save()
-            
-            UserProfile.objects.create(
-                user=user,
-                contactnumber=form.cleaned_data['contactnumber'],
-                role='customer'  # Set default role to customer
-            )
-            
+            # post_save signal already created a UserProfile with empty contactnumber.
+            # Update it with the actual contact number and role from the form.
+            profile = user.profile
+            profile.contactnumber = form.cleaned_data['contactnumber']
+            profile.role = 'customer'
+            profile.save()
+
             logger.info(f"SIGNUP_SUCCESS | IP: {client_ip} | User: {user.email}")
-            
-            # Auto log in user
+
+            # Auto log in
             user = authenticate(username=user.username, password=form.cleaned_data['password'])
             if user is not None:
                 auth_login(request, user)
                 logger.info(f"LOGIN_SUCCESS | IP: {client_ip} | User: {user.email} (Auto-login after signup)")
-            
+
             messages.success(request, "Signup successful!")
             return redirect('index')
         else:
+            # Form invalid — keep fields filled, show validation errors
             errors = []
             for field, field_errors in form.errors.items():
                 for error in field_errors:
                     errors.append(error)
             error_msg = " ".join(errors)
-            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Form validation errors: {error_msg}")
+            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: {error_msg}")
             messages.error(request, error_msg)
+            return render(request, 'signup.html', {'form': form})
     else:
         form = SignUpForm()
-    
+
     return render(request, 'signup.html', {'form': form})
 
 def login_view(request):
