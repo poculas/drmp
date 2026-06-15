@@ -52,7 +52,7 @@ function addToCart(name, price, quantity, event) {
     if (event) event.stopPropagation();   // prevent card onclick from firing
 
     if (!window.isUserLoggedIn) {
-        window.location.href = '/login';
+        window.location.href = 'login.php';
         return;
     }
     
@@ -70,7 +70,7 @@ function addToCart(name, price, quantity, event) {
         if (!response.ok) {
             // Check if redirected to login (HTML response instead of JSON)
             if (response.headers.get('content-type') && response.headers.get('content-type').includes('text/html')) {
-                window.location.href = '/login';
+                window.location.href = 'login.php';
                 return;
             }
             throw new Error('Network response was not ok');
@@ -181,7 +181,7 @@ function loadCart() {
             if (!response.ok) {
                 // Check if redirected to login (HTML response instead of JSON)
                 if (response.headers.get('content-type') && response.headers.get('content-type').includes('text/html')) {
-                    window.location.href = '/login';
+                    window.location.href = 'login.php';
                     return;
                 }
                 throw new Error('Network response was not ok');
