@@ -203,7 +203,14 @@ def signup_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        # Redirect based on role
+        # Redirect based on role, but check if this is a redirect from @login_required
+        # If there's a 'next' parameter, it means user was trying to access a protected page
+        next_url = request.GET.get('next')
+        if next_url:
+            # Allow the user to continue to their intended destination
+            return redirect(next_url)
+        
+        # Otherwise, redirect based on role
         if request.user.is_superuser:
             return redirect('/admin/')
         elif hasattr(request.user, 'profile'):

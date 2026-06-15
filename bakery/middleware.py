@@ -23,8 +23,8 @@ class RoleBasedRedirectMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Only apply to login redirect
-        if request.path == '/login' and request.user.is_authenticated:
+        # Only apply to login redirect (both /login and /login.php)
+        if request.path in ['/login', '/login.php'] and request.user.is_authenticated:
             if request.user.is_superuser:
                 return redirect('/admin/')
             elif hasattr(request.user, 'profile'):
