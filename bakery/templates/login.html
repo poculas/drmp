@@ -3,20 +3,37 @@
 
 {% block title %}Dough Re Mi Patisserie - Log in{% endblock %}
 
+{% block extra_head %}
+<style>
+    .login-messages {
+        margin-bottom: 8px;
+    }
+    /* Hide top-level messages on login page */
+    .container > .alert {
+        display: none;
+    }
+
+    .form-disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <section>
         <div class="registration">
             <h1>Log in</h1>
             <p>New user? <a href="{% url 'signup' %}">Sign up</a> instead</p>
 
-            <form id="login" method="POST" action="{% url 'login' %}">
+            <form id="login" method="POST" action="{% url 'login' %}" {% if rate_limited or lockout_seconds %}class="form-disabled"{% endif %}>
                 {% csrf_token %}
                 <label for="email"><h4>Email:</h4></label>
-                <input type="email" name="email" id="email" required>
+                <input type="email" name="email" id="email" value="{{ email }}" required>
                 <br><br><br>
                 <label for="password"><h4>Password:</h4></label>
                 <input type="password" name="password" id="password" required>
-                
+
                 <div class="captcha-wrapper" style="margin-top: 25px; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                         <img id="captcha-img" src="{% url 'captcha_image' %}" alt="CAPTCHA" style="height: 45px; border: 1px solid #ccc; border-radius: 4px; display: block;">
@@ -27,6 +44,9 @@
                     <label for="captcha"><h4>Verification Code:</h4></label>
                     <input type="text" name="captcha" id="captcha" placeholder="Enter code above" required autocomplete="off" style="width: 100%; padding: 12px 20px; box-sizing: border-box; border: none; border-bottom: 2px solid black;">
                 </div>
+
+                <!-- Message Anchor - Below Verification Code -->
+                <div id="login-message-anchor" class="login-messages" style="min-height: 0;"></div>
 
                 <button type="submit" name="login" id="submit"><h3>Log in</h3></button>
             </form>
@@ -57,14 +77,55 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        function refreshCaptcha() {
-            const img = document.getElementById('captcha-img');
-            if (img) {
-                img.src = "{% url 'captcha_image' %}?t=" + new Date().getTime();
-            }
+<script src="{% static 'scripts/notifications.js' %}"></script>
+<script>
+    function refreshCaptcha() {
+        const img = document.getElementById('captcha-img');
+        if (img) {
+            img.src = "{% url 'captcha_image' %}?t=" + new Date().getTime();
         }
-    </script>
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if messages %}
+            {% for message in messages %}
+                const messageType = '{{ message.tags }}' || 'info';
+                const messageText = '{{ message|escapejs }}';
+                console.log('Displaying message:', messageText, 'Type:', messageType);
+
+                // Get the anchor element
+                const anchor = document.getElementById('login-message-anchor');
+                if (anchor) {
+                    // Create notification directly inside the anchor
+                    const notification = document.createElement('div');
+                    notification.className = 'notification-popup notification-inline';
+                    notification.textContent = messageText;
+
+                    let bgColor = '#28a745';
+                    if (messageType === 'error') {
+                        bgColor = '#dc3545';
+                    } else if (messageType === 'warning') {
+                        bgColor = '#ffc107';
+                    } else if (messageType === 'info') {
+                        bgColor = '#17a2b8';
+                    }
+
+                    notification.style.backgroundColor = bgColor;
+                    anchor.appendChild(notification);
+
+                    console.log('Notification added to anchor');
+
+                    // Remove after 6 seconds
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 6000);
+                } else {
+                    console.log('Anchor element not found!');
+                }
+            {% endfor %}
+        {% endif %}
+    });
+
     {% if lockout_seconds %}
     <script>
         (function() {

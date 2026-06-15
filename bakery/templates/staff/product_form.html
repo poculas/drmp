@@ -3,15 +3,7 @@
 
 {% block staff_content %}
     <h1 class="mb-4">{{ title }}</h1>
-    
-    {% if messages %}
-        <div class="alert alert-success">
-            {% for message in messages %}
-                {{ message }}
-            {% endfor %}
-        </div>
-    {% endif %}
-    
+
     <form method="post" class="registration" enctype="multipart/form-data">
         {% csrf_token %}
         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -57,14 +49,4 @@
             <a href="{% url 'staff_products' %}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
-    
-    {% if form.errors %}
-    <div class="alert alert-danger mt-3">
-        {% for field in forms %}
-            {% for error in field.errors %}
-                <p>{{ error }}</p>
-            {% endfor %}
-        {% endfor %}
-    </div>
-    {% endif %}
 {% endblock %}

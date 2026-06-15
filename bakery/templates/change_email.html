@@ -9,14 +9,6 @@
             <h1>Change Email Address</h1>
             <p>Please enter your current password to update your email address.</p>
 
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-
             <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}

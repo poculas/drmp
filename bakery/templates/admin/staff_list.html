@@ -11,22 +11,14 @@
         <div class="mb-4">
             <a href="{% url 'admin_staff_create' %}" class="btn btn-primary" style="background-color: rgb(121, 65, 28); border-color: rgb(121, 65, 28);">Create Staff Account</a>
         </div>
-        
-        {% if messages %}
-            <div class="alert alert-success">
-                {% for message in messages %}
-                    {{ message }}
-                {% endfor %}
-            </div>
-        {% endif %}
-        
-        <div class="table-responsive">
-            <table class="table table-striped">
+
+        <div class="table-responsive-md">
+            <table class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
+                        <th class="d-none d-lg-table-cell">Email</th>
+                        <th class="d-none d-lg-table-cell">Phone</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -35,8 +27,8 @@
                     {% for staff_user in staff_users %}
                     <tr>
                         <td>{{ staff_user.get_full_name }}</td>
-                        <td>{{ staff_user.email }}</td>
-                        <td>{{ staff_user.profile.contactnumber }}</td>
+                        <td class="d-none d-lg-table-cell">{{ staff_user.email }}</td>
+                        <td class="d-none d-lg-table-cell">{{ staff_user.profile.contactnumber }}</td>
                         <td>
                             {% if staff_user.profile.is_active %}
                                 <span class="badge bg-success">Active</span>
@@ -45,8 +37,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'admin_staff_edit' staff_user.id %}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="{% url 'admin_staff_delete' staff_user.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            <a href="{% url 'admin_staff_edit' staff_user.id %}" class="btn btn-sm btn-warning" title="Edit">Edit</a>
+                            <a href="{% url 'admin_staff_delete' staff_user.id %}" class="btn btn-sm btn-danger" title="Delete">Delete</a>
                         </td>
                     </tr>
                     {% empty %}

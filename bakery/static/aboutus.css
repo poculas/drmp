@@ -271,3 +271,141 @@ pointer-events: none;
 animation: contentOut 1.5s linear 1 forwards!important;
 }
 
+/** Responsive Design Media Queries **/
+@media (max-width: 1024px) {
+  .slider {
+    height: 70vh;
+  }
+
+  .slider .list .item .content .title,
+  .slider .list .item .content .type {
+    font-size: 3.5em;
+  }
+
+  .description {
+    font-size: 18px;
+    max-width: 60%;
+  }
+}
+
+@media (max-width: 768px) {
+  .slider {
+    height: 60vh;
+  }
+
+  .slider .list .item {
+    margin-left: 5%;
+  }
+
+  .slider .list .item .content .title,
+  .slider .list .item .content .type {
+    font-size: 2.5em;
+  }
+
+  .description {
+    font-size: 16px;
+    max-width: 70%;
+    padding: 12px;
+  }
+
+  .thumbnail .item {
+    width: 120px;
+    height: 180px;
+  }
+
+  .nextPrevArrows {
+    right: 48%;
+    width: 200px;
+  }
+
+  .nextPrevArrows button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 599px) {
+  .slider {
+    height: 50vh;
+    min-height: 300px;
+  }
+
+  .slider .list .item {
+    margin-left: 2%;
+    margin-top: 10px;
+  }
+
+  .slider .list .item .content .title,
+  .slider .list .item .content .type {
+    font-size: 1.75em;
+    line-height: 1.2em;
+  }
+
+  .description {
+    font-size: 14px;
+    max-width: 85%;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .thumbnail {
+    bottom: 20px;
+    gap: 10px;
+  }
+
+  .thumbnail .item {
+    width: 100px;
+    height: 150px;
+  }
+
+  .nextPrevArrows {
+    top: 50%;
+    right: 45%;
+    width: 120px;
+  }
+
+  .nextPrevArrows button {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .slider.next .list .item:nth-child(1) img {
+    width: 100px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slider {
+    height: 45vh;
+    min-height: 250px;
+  }
+
+  .slider .list .item .content .title,
+  .slider .list .item .content .type {
+    font-size: 1.4em;
+  }
+
+  .description {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .thumbnail .item {
+    width: 80px;
+    height: 120px;
+  }
+
+  .nextPrevArrows {
+    width: 100px;
+  }
+
+  .nextPrevArrows button {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+

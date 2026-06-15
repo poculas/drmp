@@ -11,13 +11,30 @@ h1, h2{
     }
 table{
     background-color: white;
-    height:250px;
-    width: 500px;
+    width: 100%;
+    max-width: 500px;
     margin: 0 auto;
+    border-collapse: collapse;
 }
 
 td,th{
     padding: 15px;
+    border: 1px solid #dee2e6;
+}
+
+@media (max-width: 599px) {
+    h1, h2 {
+        font-size: 20px;
+    }
+
+    table {
+        max-width: 100%;
+        font-size: 14px;
+    }
+
+    td, th {
+        padding: 10px;
+    }
 }
 </style>
 {% endblock %}

@@ -154,9 +154,13 @@
     }
 
     .error-message {
-        color: #d32f2f;
-        font-weight: 600;
+        background-color: #dc3545;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        font-weight: 500;
         margin-top: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
 {% endblock %}
@@ -176,17 +180,6 @@
             <i class="fas fa-envelope"></i> Email Code
         </span>
     </div>
-
-    {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
 
     <div class="code-info">
         <p><strong>Email Code</strong></p>

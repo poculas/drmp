@@ -20,6 +20,13 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
+@media (max-width: 599px) {
+    .delivery-container {
+        margin-top: 20px;
+        padding: 20px;
+    }
+}
+
 h2 {
     text-align: center;
     color: rgb(46, 33, 2);
@@ -72,13 +79,6 @@ select {
     <section id="delivery-info">
         <div class="delivery-container">
             <h2>Billing Information</h2>
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
             <form id="delivery" action="{% url 'delivery' %}" method="POST">
                 {% csrf_token %}
                 <label for="house">House/Unit No.:</label>

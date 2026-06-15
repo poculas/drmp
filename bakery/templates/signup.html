@@ -5,6 +5,11 @@
 
 {% block extra_head %}
 <style>
+/* Hide top-level messages on signup page */
+.container > .alert {
+    display: none;
+}
+
 .password-requirements-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -87,6 +92,11 @@
         font-size: 0.8125rem;
     }
 }
+
+.form-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
 </style>
 {% endblock %}
 
@@ -96,15 +106,7 @@
             <h1>Sign Up</h1>
             <p>Already have an account? <a href="{% url 'login' %}">Log in</a> instead</p>
 
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-
-            <form id="signup" action="{% url 'signup' %}" method="POST">
+            <form id="signup" action="{% url 'signup' %}" method="POST" {% if rate_limited %}class="form-disabled"{% endif %}>
                 {% csrf_token %}
                 <label for="Fname"><h4>First Name:</h4></label>
                 <input type="text" name="first_name" id="Fname" required>
@@ -135,8 +137,8 @@
                 <label for="pass2"><h4>Confirm Password:</h4></label>
                 <input type="password" name="confirm_password" id="pass2" required oninput="checkPasswordMatch()">
                 
-                <div id="password-match" style="font-size: 0.85rem; margin-top: 10px; display: none;">
-                    <p id="req-match" style="margin: 0; color: #dc3545; font-weight: 500;">❌ Passwords do not match</p>
+                <div id="password-match" style="background-color: #dc3545; color: white; padding: 15px 20px; border-radius: 5px; font-size: 14px; font-weight: 500; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); display: none;">
+                    <p id="req-match" style="margin: 0;">❌ Passwords do not match</p>
                 </div>
                 
                 <div class="captcha-wrapper" style="margin-top: 25px; margin-bottom: 15px;">
@@ -148,6 +150,7 @@
                     </div>
                     <label for="captcha"><h4>Verification Code:</h4></label>
                     <input type="text" name="captcha" id="captcha" placeholder="Enter code above" required autocomplete="off" style="width: 100%; padding: 12px 20px; box-sizing: border-box; border: none; border-bottom: 2px solid black;">
+                    <div id="signup-message-anchor" class="login-messages" style="margin-bottom: 8px;"></div>
                 </div>
 
                 <button type="submit" name="register" id="submit"><h3>Sign Up</h3></button>
@@ -163,6 +166,7 @@
         </div>
     </section>
 
+<script src="{% static 'scripts/notifications.js' %}"></script>
 <script>
 function refreshCaptcha() {
     const img = document.getElementById('captcha-img');
@@ -170,6 +174,46 @@ function refreshCaptcha() {
         img.src = "{% url 'captcha_image' %}?t=" + new Date().getTime();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    {% if messages %}
+        {% for message in messages %}
+            const messageType = '{{ message.tags }}' || 'info';
+            const messageText = '{{ message|escapejs }}';
+            console.log('Displaying message:', messageText, 'Type:', messageType);
+
+            // Get the anchor element
+            const anchor = document.getElementById('signup-message-anchor');
+            if (anchor) {
+                // Create notification directly inside the anchor
+                const notification = document.createElement('div');
+                notification.className = 'notification-popup notification-inline';
+                notification.textContent = messageText;
+
+                let bgColor = '#28a745';
+                if (messageType === 'error') {
+                    bgColor = '#dc3545';
+                } else if (messageType === 'warning') {
+                    bgColor = '#ffc107';
+                } else if (messageType === 'info') {
+                    bgColor = '#17a2b8';
+                }
+
+                notification.style.backgroundColor = bgColor;
+                anchor.appendChild(notification);
+
+                console.log('Notification added to anchor');
+
+                // Remove after 6 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 6000);
+            } else {
+                console.log('Anchor element not found!');
+            }
+        {% endfor %}
+    {% endif %}
+});
 
 function checkPasswordRequirements() {
     const password = document.getElementById('pass').value;

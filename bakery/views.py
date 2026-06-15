@@ -3,7 +3,7 @@ import logging
 import random
 import string
 from decimal import Decimal
-import cloudinary.uploader
+
 from dough_re_mi import settings
 
 logger = logging.getLogger('security')
@@ -139,63 +139,66 @@ def signup_view(request):
         return redirect('index')
     
     if request.method == 'POST':
+        # Rate limiting: Check IP-based signup rate limit (max 5 attempts per 15 minutes)
         client_ip = get_client_ip(request)
-
-        # Rate limiting
         rate_limit_key = f'signup_rate_limit_{client_ip}'
         attempts = cache.get(rate_limit_key, 0)
+
         if attempts >= 5:
             messages.error(request, "Too many signup attempts. Please try again later.")
             logger.warning(f"SIGNUP_RATE_LIMIT | IP: {client_ip} | Attempts: {attempts}")
-            return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
-        cache.set(rate_limit_key, attempts + 1, 900)
+            return render(request, 'signup.html', {'form': SignUpForm(request.POST), 'rate_limited': True})
+
+        # Increment rate limit counter
+        cache.set(rate_limit_key, attempts + 1, 900)  # 15 minutes
 
         # CAPTCHA validation
         captcha_submitted = request.POST.get('captcha', '').strip().upper()
         captcha_expected = request.session.get('captcha_code')
+
+        # Clear session CAPTCHA to prevent replay/reuse
         if 'captcha_code' in request.session:
             del request.session['captcha_code']
+
         if not captcha_expected or captcha_submitted != captcha_expected:
             messages.error(request, "Invalid CAPTCHA. Please try again.")
-            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA")
+            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA | Expected: {captcha_expected}, Submitted: {captcha_submitted}")
             return render(request, 'signup.html', {'form': SignUpForm(request.POST)})
 
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
-            user.username = form.cleaned_data['email']
+            user.username = form.cleaned_data['email']  # Use email as username
             user.save()
-            # post_save signal already created a UserProfile with empty contactnumber.
-            # Update it with the actual contact number and role from the form.
-            profile = user.profile
-            profile.contactnumber = form.cleaned_data['contactnumber']
-            profile.role = 'customer'
-            profile.save()
-
+            
+            UserProfile.objects.create(
+                user=user,
+                contactnumber=form.cleaned_data['contactnumber'],
+                role='customer'  # Set default role to customer
+            )
+            
             logger.info(f"SIGNUP_SUCCESS | IP: {client_ip} | User: {user.email}")
-
-            # Auto log in
+            
+            # Auto log in user
             user = authenticate(username=user.username, password=form.cleaned_data['password'])
             if user is not None:
                 auth_login(request, user)
                 logger.info(f"LOGIN_SUCCESS | IP: {client_ip} | User: {user.email} (Auto-login after signup)")
-
+            
             messages.success(request, "Signup successful!")
             return redirect('index')
         else:
-            # Form invalid — keep fields filled, show validation errors
             errors = []
             for field, field_errors in form.errors.items():
                 for error in field_errors:
                     errors.append(error)
             error_msg = " ".join(errors)
-            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: {error_msg}")
+            logger.warning(f"SIGNUP_FAILED | IP: {client_ip} | Reason: Form validation errors: {error_msg}")
             messages.error(request, error_msg)
-            return render(request, 'signup.html', {'form': form})
     else:
         form = SignUpForm()
-
+    
     return render(request, 'signup.html', {'form': form})
 
 def login_view(request):
@@ -231,6 +234,7 @@ def login_view(request):
         if not captcha_expected or captcha_submitted != captcha_expected:
             messages.error(request, "Invalid CAPTCHA. Please try again.")
             logger.warning(f"LOGIN_FAILED | IP: {client_ip} | Reason: Invalid CAPTCHA")
+            context['email'] = request.POST.get('email', '')
             return render(request, 'login.html', context)
 
         email = request.POST.get('email')
@@ -243,6 +247,8 @@ def login_view(request):
         if attempts >= 10:
             messages.error(request, "Too many login attempts. Please try again later.")
             logger.warning(f"LOGIN_RATE_LIMIT | IP: {client_ip} | Attempts: {attempts}")
+            context['email'] = request.POST.get('email', '')
+            context['rate_limited'] = True
             return render(request, 'login.html', context)
 
         # Increment rate limit counter
@@ -259,6 +265,7 @@ def login_view(request):
                     minutes = int(seconds / 60)
                     messages.error(request, f"Account is locked. Please try again in {minutes} minutes.")
                     context['lockout_seconds'] = seconds
+                    context['email'] = email
                     logger.warning(f"LOGIN_LOCKED | IP: {client_ip} | User: {user.email}")
                     return render(request, 'login.html', context)
 
@@ -294,11 +301,12 @@ def login_view(request):
         else:
             # Failed login attempt - increment counter for the user if exists
             logger.warning(f"LOGIN_FAILED | IP: {client_ip} | Reason: Invalid credentials | Email: {email}")
+            context['email'] = email
             try:
                 user_obj = User.objects.get(username=email)
                 profile = user_obj.profile
                 profile.increment_failed_attempts()
-                
+
                 if profile.is_locked():
                     messages.error(request, "Account locked due to too many failed attempts. Please try again in 30 minutes.")
                     logger.warning(f"ACCOUNT_LOCKED | IP: {client_ip} | User: {user_obj.email} | Reason: Max failed login attempts")
@@ -952,34 +960,13 @@ def staff_products(request):
     
     return render(request, 'staff/products.html', {'page_obj': page_obj})
 
-import cloudinary.uploader
-
 @staff_required
 def staff_product_create(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = ProductForm(request.POST)
         if form.is_valid():
-            product = form.save(commit=False)
-
-            # Upload image to Cloudinary if provided
-            if 'image' in request.FILES:
-                image_file = request.FILES['image']
-                try:
-                    upload_result = cloudinary.uploader.upload(
-                        image_file,
-                        folder='drmp/products',
-                        resource_type='image'
-                    )
-                    # Store the Cloudinary URL in the image field
-                    product.image = upload_result['secure_url']
-                except Exception as e:
-                    messages.error(request, f"Image upload failed: {str(e)}")
-                    return render(request, 'staff/product_form.html', {
-                        'form': form,
-                        'title': 'Add Product'
-                    })
-
-            product.save()
+            product = form.save()
+            # Log audit
             AuditLog.objects.create(
                 user=request.user,
                 action='product_create',
@@ -991,9 +978,8 @@ def staff_product_create(request):
             return redirect('staff_products')
     else:
         form = ProductForm()
-
+    
     return render(request, 'staff/product_form.html', {'form': form, 'title': 'Add Product'})
-
 
 @staff_required
 def staff_product_edit(request, product_id):
@@ -1003,28 +989,9 @@ def staff_product_edit(request, product_id):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             edited_product = form.save(commit=False)
-
-            # Upload new image to Cloudinary if a new one was provided
-            if 'image' in request.FILES:
-                image_file = request.FILES['image']
-                try:
-                    upload_result = cloudinary.uploader.upload(
-                        image_file,
-                        folder='drmp/products',
-                        resource_type='image'
-                    )
-                    edited_product.image = upload_result['secure_url']
-                except Exception as e:
-                    messages.error(request, f"Image upload failed: {str(e)}")
-                    return render(request, 'staff/product_form.html', {
-                        'form': form,
-                        'title': 'Edit Product',
-                        'product': product
-                    })
-            else:
-                # No new image uploaded — keep existing value from DB
+            # If no new image uploaded, keep the existing image name in DB
+            if 'image' not in request.FILES:
                 edited_product.image = product.image
-
             edited_product.save()
             AuditLog.objects.create(
                 user=request.user,

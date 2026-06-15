@@ -15,6 +15,11 @@
         height: 200px;
         object-fit: cover;
     }
+    @media (max-width: 599px) {
+        .card-img-top {
+            height: 150px;
+        }
+    }
     .btn-primary {
         background-color: #8b4513;
         border-color: #8b4513;
@@ -33,6 +38,12 @@
         box-shadow: -2px 0 5px rgba(0,0,0,0.1);
         transition: right 0.3s ease;
         z-index: 1000;
+    }
+    @media (max-width: 599px) {
+        .cart {
+            right: -90vw;
+            width: 90vw;
+        }
     }
     .cart.open {
         right: 0;

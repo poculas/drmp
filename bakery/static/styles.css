@@ -44,10 +44,18 @@ body {
 .registration{
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
-  max-width: 30%;
+  max-width: 100%;
   box-shadow: 0 0 10px black;
-  margin: 5% 5% 5% 35%;
-  padding:30px;
+  margin: 20px;
+  padding: 20px;
+}
+
+@media (min-width: 768px) {
+  .registration {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+  }
 }
 
 h1, p {
@@ -97,17 +105,23 @@ td input{
   color:white;   
 }
 #quantity{
-  width: 20%;
+  width: 100%;
 }
 #qty{
-  width: 40%;
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  #quantity {
+    width: 20%;
+  }
+  #qty {
+    width: 40%;
+  }
 }
 
 /** Notification Popup **/
 .notification-popup {
-    position: fixed;
-    top: 20px;
-    right: 20px;
     padding: 15px 20px;
     border-radius: 5px;
     color: white;
@@ -116,8 +130,22 @@ td input{
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 9999;
     animation: slideIn 0.3s ease-out;
-    max-width: 300px;
     word-wrap: break-word;
+}
+
+.notification-popup[data-position="top-right"] {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 300px;
+}
+
+.notification-popup.notification-inline {
+    position: relative;
+    margin-bottom: 15px;
+    display: block;
+    width: 100%;
+    max-width: 100%;
 }
 
 @keyframes slideIn {
@@ -129,4 +157,107 @@ td input{
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+/** Global Responsive Media Queries **/
+@media (max-width: 599px) {
+    /* Typography scaling for mobile */
+    h1, .h1 { font-size: 1.75rem; }
+    h2, .h2 { font-size: 1.5rem; }
+    h3, .h3 { font-size: 1.25rem; }
+    h4, .h4 { font-size: 1.1rem; }
+    h5, .h5 { font-size: 1rem; }
+    p { font-size: 0.95rem; }
+
+    /* Button touch targets - minimum 44px */
+    button, a.btn, input[type="button"], input[type="submit"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .btn-sm {
+        min-height: 36px;
+    }
+
+    /* Notification popup on very small screens */
+    .notification-popup[data-position="top-right"] {
+        top: 10px;
+        right: 10px;
+        max-width: calc(100vw - 20px);
+    }
+
+    /* Form inputs padding on mobile */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        padding: 12px !important;
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Additional tablet portrait adjustments */
+    .notification-popup[data-position="top-right"] {
+        max-width: calc(100vw - 30px);
+    }
+}
+
+@media (max-width: 640px) {
+    .notification-popup[data-position="top-right"] {
+        top: 10px;
+        right: 10px;
+        max-width: calc(100% - 20px);
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small devices adjustments */
+    body {
+        font-size: 14px;
+    }
+
+    .notification-popup {
+        font-size: 13px;
+        padding: 12px 15px;
+    }
+}
+
+@media (max-width: 640px) {
+    .notification-popup[data-position="top-right"] {
+        top: 10px;
+        right: 10px;
+        max-width: calc(100% - 20px);
+    }
+}
+
+/** Form Error Styling (matches notification-popup) **/
+.error,
+.errorlist,
+.error-message {
+    background-color: #dc3545;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.errorlist {
+    list-style: none;
+    margin: 0;
+    padding: 15px 20px;
+}
+
+.errorlist li {
+    margin: 0;
+}
+
+.errorlist li + li {
+    margin-top: 8px;
 }

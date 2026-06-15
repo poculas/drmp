@@ -20,6 +20,13 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
         }
 
+        @media (max-width: 599px) {
+            .checkout-container {
+                margin-top: 20px;
+                padding: 20px;
+            }
+        }
+
         h2 {
             text-align: center;
             color: rgb(46, 33, 2);
@@ -141,10 +148,14 @@
         }
 
         .error {
-            color: #dc3545;
+            background-color: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
             font-size: 14px;
-            margin-top: -10px;
-            margin-bottom: 10px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
     </style>
 {% endblock %}
@@ -169,14 +180,6 @@
                     <li>Customers may visit the store <b>DURING</b> operating hours: 9:00 AM to 7:00 PM</li>
                 </ul>
             </div>
-
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
 
             <div class="order-summary">
                 <h3>Order Summary</h3>

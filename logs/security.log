@@ -83,3 +83,46 @@
 2026-06-15 13:42:11,924 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: rochelle | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
 2026-06-15 13:42:12,494 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: rochelle | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
 2026-06-15 13:47:09,066 [INFO] security - LOGOUT | User: poculas.nna@gmail.com
+2026-06-15 07:20:33,044 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: jecoleishome@gmail.com
+2026-06-15 07:23:35,055 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 07:24:01,628 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 07:25:19,737 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 07:32:41,171 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 07:33:42,888 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 07:38:17,159 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mmfardientes@tip.edu.ph
+2026-06-15 07:38:23,334 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 07:38:45,626 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 07:46:36,564 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 07:51:34,965 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mmfardientes@tip.edu.ph
+2026-06-15 07:51:58,367 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 07:52:31,644 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:01:00,695 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
+2026-06-15 08:02:19,810 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
+2026-06-15 08:03:31,394 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
+2026-06-15 08:06:09,921 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 08:06:48,611 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
+2026-06-15 08:10:37,713 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:10:52,540 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:12:35,014 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:19:52,626 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: testexample@gmail.com
+2026-06-15 08:21:45,271 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:24:52,056 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mmfardientes@tip.edu.ph
+2026-06-15 08:25:32,033 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 08:25:32,708 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 08:25:38,834 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 08:25:38,836 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 08:25:45,516 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 08:25:45,526 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 08:26:15,765 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
+2026-06-15 08:27:34,305 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:27:42,257 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:33:46,551 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:34:20,975 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:34:26,404 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:34:35,974 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:34:46,980 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:36:16,116 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:37:02,125 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
+2026-06-15 08:37:26,617 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
+2026-06-15 08:37:36,905 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 08:42:59,447 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
