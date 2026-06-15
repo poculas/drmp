@@ -3,7 +3,7 @@ import logging
 import random
 import string
 from decimal import Decimal
-
+import cloudinary.uploader
 from dough_re_mi import settings
 
 logger = logging.getLogger('security')
@@ -952,13 +952,34 @@ def staff_products(request):
     
     return render(request, 'staff/products.html', {'page_obj': page_obj})
 
+import cloudinary.uploader
+
 @staff_required
 def staff_product_create(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save()
-            # Log audit
+            product = form.save(commit=False)
+
+            # Upload image to Cloudinary if provided
+            if 'image' in request.FILES:
+                image_file = request.FILES['image']
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        image_file,
+                        folder='drmp/products',
+                        resource_type='image'
+                    )
+                    # Store the Cloudinary URL in the image field
+                    product.image = upload_result['secure_url']
+                except Exception as e:
+                    messages.error(request, f"Image upload failed: {str(e)}")
+                    return render(request, 'staff/product_form.html', {
+                        'form': form,
+                        'title': 'Add Product'
+                    })
+
+            product.save()
             AuditLog.objects.create(
                 user=request.user,
                 action='product_create',
@@ -970,8 +991,9 @@ def staff_product_create(request):
             return redirect('staff_products')
     else:
         form = ProductForm()
-    
+
     return render(request, 'staff/product_form.html', {'form': form, 'title': 'Add Product'})
+
 
 @staff_required
 def staff_product_edit(request, product_id):
@@ -981,9 +1003,28 @@ def staff_product_edit(request, product_id):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             edited_product = form.save(commit=False)
-            # If no new image uploaded, keep the existing image name in DB
-            if 'image' not in request.FILES:
+
+            # Upload new image to Cloudinary if a new one was provided
+            if 'image' in request.FILES:
+                image_file = request.FILES['image']
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        image_file,
+                        folder='drmp/products',
+                        resource_type='image'
+                    )
+                    edited_product.image = upload_result['secure_url']
+                except Exception as e:
+                    messages.error(request, f"Image upload failed: {str(e)}")
+                    return render(request, 'staff/product_form.html', {
+                        'form': form,
+                        'title': 'Edit Product',
+                        'product': product
+                    })
+            else:
+                # No new image uploaded — keep existing value from DB
                 edited_product.image = product.image
+
             edited_product.save()
             AuditLog.objects.create(
                 user=request.user,

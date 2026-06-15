@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Load environment variables from .env file
 load_dotenv()
@@ -47,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage',          # must be before staticfiles
     'django.contrib.staticfiles',
     'cloudinary',
     # Django allauth
@@ -139,19 +141,19 @@ STATICFILES_DIRS = [
     BASE_DIR / 'bakery' / 'static'
 ]
 
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
+
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
-}
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
 }
 
 # Static root for production (collectstatic)
@@ -342,5 +344,3 @@ if not os.getenv('RENDER'):
     LOGGING['loggers']['security']['handlers'] = ['security_file', 'console']
     LOGGING['loggers']['django.security']['handlers'] = ['security_file', 'console']
     LOGGING['loggers']['django.request']['handlers'] = ['error_file', 'console']
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
