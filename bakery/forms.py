@@ -195,20 +195,18 @@ class ProductForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
             'is_available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-    
+
     def clean_image(self):
         image = self.cleaned_data.get('image')
-        if image:
-            # Check if it's an uploaded file (not a string from existing image)
-            if hasattr(image, 'size'):
-                # Check file size (3MB = 3 * 1024 * 1024 bytes)
-                if image.size > 3 * 1024 * 1024:
-                    raise ValidationError("Image file size must be no more than 3MB.")
+        # Only validate size if a new file was actually uploaded
+        if image and hasattr(image, 'size') and hasattr(image, 'read'):
+            if image.size > 3 * 1024 * 1024:
+                raise ValidationError("Image file size must be no more than 3MB.")
         return image
 
 class OrderStatusForm(forms.ModelForm):
