@@ -542,3 +542,20 @@ django.db.utils.ProgrammingError: column bakery_order.quantity does not exist
 LINE 1: ..._order"."item_name", "bakery_order"."item_price", "bakery_or...
                                                              ^
 
+2026-06-15 12:16:31,889 [ERROR] django.request - Internal Server Error: /profile.php
+Traceback (most recent call last):
+  File "C:\Users\Pc\Desktop\DRMP\Dough-Re-Mi-Patisserie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pc\Desktop\DRMP\Dough-Re-Mi-Patisserie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pc\Desktop\DRMP\Dough-Re-Mi-Patisserie\bakery\views.py", line 1303, in profile_view
+    profile = request.user.profile
+              ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pc\Desktop\DRMP\Dough-Re-Mi-Patisserie\.venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pc\Desktop\DRMP\Dough-Re-Mi-Patisserie\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 531, in __get__
+    raise self.RelatedObjectDoesNotExist(
+django.contrib.auth.models.User.profile.RelatedObjectDoesNotExist: User has no profile.

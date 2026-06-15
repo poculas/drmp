@@ -360,6 +360,12 @@ def cart_get(request):
 @require_POST
 def cart_add(request):
     try:
+        # Ensure user has a profile (for OAuth users)
+        UserProfile.objects.get_or_create(
+            user=request.user,
+            defaults={'contactnumber': '', 'role': 'customer'}
+        )
+        
         data = json.loads(request.body)
         name = data.get('name')
         quantity = int(data.get('quantity', 1))
@@ -1300,7 +1306,11 @@ def change_email_view(request):
     return render(request, 'change_email.html', {'form': form})
 
 def profile_view(request):
-    profile = request.user.profile
+    # Create profile if it doesn't exist (for OAuth users)
+    profile, created = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'contactnumber': '', 'role': 'customer'}
+    )
     return render(request, 'profile.html', {
         'profile': profile
     })
