@@ -88,7 +88,7 @@ Dear {user.first_name or user.username},
 
 Your 2FA verification code is: {code}
 
-This code will expire in 10 minutes.
+This code will expire in 2 minutes.
 
 If you did not request this code, please ignore this email.
 
