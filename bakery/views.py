@@ -2,6 +2,7 @@ import json
 import logging
 import random
 import string
+from collections import defaultdict
 from decimal import Decimal
 
 from dough_re_mi import settings
@@ -12,22 +13,22 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
 from django.core.paginator import Paginator
-from django.core.mail import send_mail
+from django.urls import reverse
+from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.utils import timezone
 from datetime import timedelta
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.template.loader import render_to_string
-from django.views.decorators.csrf import csrf_exempt
-import json
 
 from bakery.models import Product, CartItem, Order, Receipt, UserProfile, AuditLog, Payment, generate_order_reference_number, MFACode
+from bakery.order_views import order_detail_view
 from bakery.forms import SignUpForm, DeliveryForm, PickupForm, StaffCreateForm, StaffEditForm, ProductForm, OrderStatusForm, EmailChangeForm
 from bakery.paymongo_utils import create_paymongo_checkout, verify_paymongo_payment, deduct_stock_for_orders, process_webhook_event
 from bakery.decorators import staff_required, admin_required
@@ -100,24 +101,51 @@ def send_order_confirmation_email(receipt, orders):
     """Send order confirmation email to customer"""
     try:
         subject = f"Order Confirmation - {receipt.reference_number}"
-        
+        from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+        if not from_email:
+            raise ValueError('No from email configured for order confirmation email.')
+
+        # Build order item details for the email receipt
+        order_items = []
+        total_quantity = 0
+        subtotal = Decimal('0.00')
+        for order in orders:
+            quantity = order.quantity or 1
+            line_total = order.item_price * quantity
+            order_items.append({
+                'name': order.item_name,
+                'quantity': quantity,
+                'unit_price': order.item_price,
+                'line_total': line_total,
+            })
+            total_quantity += quantity
+            subtotal += line_total
+
         # Render HTML email template
         html_message = render_to_string('emails/order_confirmation.html', {
             'receipt': receipt,
-            'orders': orders,
+            'orders': order_items,
+            'total_quantity': total_quantity,
+            'subtotal': subtotal,
             'settings': settings
         })
-        
-        # Send email
-        send_mail(
-            subject=subject,
-            message=f"Your order {receipt.reference_number} has been confirmed. Pickup availability date: {receipt.pickup_availability_date}",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[receipt.user.email],
-            html_message=html_message,
-            fail_silently=False
+
+        plain_message = (
+            f"Order {receipt.reference_number} confirmed. "
+            f"Amount paid: ₱{receipt.amount_paid}. "
+            f"Pickup date: {receipt.pickup_availability_date}. "
+            f"Thank you for ordering from Dough Re Mi Patisserie."
         )
-        
+
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=from_email,
+            to=[receipt.user.email]
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send(fail_silently=False)
+
         return True
     except Exception as e:
         print(f"Error sending email: {str(e)}")
@@ -624,43 +652,81 @@ def checkout_view(request):
     if not session_id:
         request.session.create()
         session_id = request.session.session_key
-        
+
     request.session['checkout_session_id'] = session_id
-    
-    total_price = Decimal('0.00')
-    for item in cart_items:
-        subtotal = item.product.price * item.quantity
-        total_price += subtotal
-        
+
+    # Generate a stable order reference at checkout creation so it is available immediately.
+    order_reference = generate_order_reference_number()
+    request.session['order_reference'] = order_reference
+
+    shipping_fee = Decimal('0.00')
+    subtotal = Decimal('0.00')
+    order_items = []
+
+    for item in cart_items.select_related('product'):
+        if item.quantity <= 0:
+            logger.warning(f"CHECKOUT_INVALID_QUANTITY | user={request.user.id} | product={item.product.name} | quantity={item.quantity}")
+            return JsonResponse({'success': False, 'message': f'Invalid quantity for {item.product.name}'}, status=400)
+
+        product_price = item.product.price
+        if product_price is None:
+            logger.error(f"CHECKOUT_MISSING_PRICE | user={request.user.id} | product={item.product.name}")
+            return JsonResponse({'success': False, 'message': f'Price not found for {item.product.name}'}, status=400)
+
+        line_subtotal = product_price * item.quantity
+        subtotal += line_subtotal
+        order_items.append({
+            'name': item.product.name,
+            'price': str(product_price),
+            'quantity': item.quantity,
+            'subtotal': str(line_subtotal)
+        })
+
         # Update stock
         item.product.stock -= item.quantity
         if item.product.stock <= 0:
             item.product.is_available = False
         item.product.save()
-        
-        # Create a single order with quantity instead of multiple orders
+
         Order.objects.create(
             user=request.user,
             session_id=session_id,
             item_name=item.product.name,
             item_price=item.product.price,
-            quantity=item.quantity
+            quantity=item.quantity,
+            reference_number=order_reference
         )
-            
+
+    total_price = subtotal + shipping_fee
+    if total_price <= 0:
+        logger.error(f"CHECKOUT_ZERO_TOTAL | user={request.user.id} | subtotal={subtotal} | shipping_fee={shipping_fee}")
+        return JsonResponse({'success': False, 'message': 'Invalid order total. Please verify your cart.'}, status=400)
+
+    logger.info(f"CHECKOUT_SUMMARY | user={request.user.id} | reference={order_reference} | items={order_items} | subtotal={subtotal} | shipping_fee={shipping_fee} | grand_total={total_price}")
+
+    request.session['checkout_subtotal'] = str(subtotal)
+    request.session['checkout_shipping_fee'] = str(shipping_fee)
     request.session['total_price'] = str(total_price)
     cart_items.delete()
-    
+
     return JsonResponse({'success': True})
 
 @login_required
 def pickup_view(request):
     session_id = request.session.get('checkout_session_id')
-    total_price = request.session.get('total_price', '0.00')
-    
+    total_price = Decimal(request.session.get('total_price', '0.00'))
+    shipping_fee = Decimal(request.session.get('checkout_shipping_fee', '0.00'))
+    subtotal = Decimal(request.session.get('checkout_subtotal', '0.00'))
+
     if not session_id or not Order.objects.filter(session_id=session_id).exists():
         messages.error(request, "No active order to bill.")
         return redirect('menu')
-    
+
+    if total_price <= 0:
+        logger.error(f"PICKUP_INVALID_TOTAL | user={request.user.id} | total_price={total_price} | session_id={session_id}")
+        messages.error(request, "Unable to proceed with checkout because the order total is invalid.")
+        return redirect('menu')
+
     # Group orders by item name and sum quantities
     orders = Order.objects.filter(session_id=session_id, user=request.user)
     grouped_orders = {}
@@ -706,11 +772,18 @@ def pickup_view(request):
                 'pickup_availability_date': pickup_availability_date.strftime('%Y-%m-%d')
             }
             
-            # Create PayMongo checkout session
+            # Create PayMongo checkout session using the current host / port
+            success_url = request.build_absolute_uri(reverse('payment_success'))
+            cancel_url = request.build_absolute_uri(reverse('menu'))
+            checkout_info = request.session.get('checkout_info', {})
+            checkout_info['session_id'] = session_id
             payment_result = create_paymongo_checkout(
                 amount=amount_paid,
                 description=f"Order Payment - {payment_option.title()} - {request.user.username}",
-                user=request.user
+                user=request.user,
+                success_url=success_url,
+                cancel_url=cancel_url,
+                checkout_info=checkout_info
             )
             
             if payment_result['success']:
@@ -763,8 +836,16 @@ def payment_success_view(request):
             payment.raw_response = verification_result.get('raw_response')
             payment.save()
             
-            # Generate order reference number
-            reference_number = generate_order_reference_number()
+            # Get orders for this session
+            orders = Order.objects.filter(session_id=session_id, user=request.user)
+            
+            # Get or generate reference number using order's purchase date
+            first_order = orders.first()
+            if first_order and first_order.reference_number and first_order.reference_number.startswith('DRMP-'):
+                reference_number = first_order.reference_number
+            else:
+                # Generate reference using the order's purchase date
+                reference_number = generate_order_reference_number(first_order.ordered_at if first_order else None)
             
             # Create receipt with payment information
             receipt = Receipt.objects.create(
@@ -786,7 +867,6 @@ def payment_success_view(request):
             payment.save()
             
             # Update orders with payment information and reference number
-            orders = Order.objects.filter(session_id=session_id, user=request.user)
             orders.update(
                 payment_option=checkout_info['payment_option'],
                 total_amount=checkout_info['total_amount'],
@@ -826,7 +906,7 @@ def payment_success_view(request):
             request.session.pop('checkout_id', None)
             request.session.pop('checkout_info', None)
             
-            return redirect('menu')
+            return redirect('order_success')
             
         except Exception as e:
             messages.error(request, f"Error processing order: {str(e)}")
@@ -884,7 +964,6 @@ def paymongo_webhook_view(request):
 @login_required
 def order_success_view(request):
     """Display order success page after successful payment"""
-    # Get the most recent receipt for the user
     receipt = Receipt.objects.filter(user=request.user).order_by('-id').first()
     
     if not receipt:
@@ -892,28 +971,72 @@ def order_success_view(request):
         return redirect('menu')
     
     orders = Order.objects.filter(session_id=receipt.session_id, user=request.user)
-    
+    order_details = []
+    total_cost = Decimal('0.00')
+    for order in orders:
+        line_total = order.item_price * order.quantity
+        order_details.append({
+            'item_name': order.item_name,
+            'quantity': order.quantity,
+            'unit_price': order.item_price,
+            'line_total': line_total
+        })
+        total_cost += line_total
+
     return render(request, 'order_success.html', {
         'receipt': receipt,
-        'orders': orders
+        'orders': orders,
+        'order_details': order_details,
+        'total_quantity': sum(item['quantity'] for item in order_details),
+        'total_cost': total_cost,
     })
 
 @login_required
 def receipt_view(request):
-    session_id = request.session.get('checkout_session_id')
-    if not session_id:
-        return redirect('menu')
-        
-    receipt = get_object_or_404(Receipt, session_id=session_id, user=request.user)
-    orders = Order.objects.filter(session_id=session_id, user=request.user)
-    
+    receipt_id = request.GET.get('receipt_id')
+    session_id_param = request.GET.get('session_id')
+
+    if receipt_id:
+        receipt = get_object_or_404(Receipt, id=receipt_id, user=request.user)
+    elif session_id_param:
+        receipt = Receipt.objects.filter(session_id=session_id_param, user=request.user).order_by('-id').first()
+        if not receipt:
+            messages.error(request, "Receipt not found for this session.")
+            return redirect('profile')
+    else:
+        session_id = request.session.get('checkout_session_id')
+        if not session_id:
+            return redirect('menu')
+        receipt = get_object_or_404(Receipt, session_id=session_id, user=request.user)
+
+    orders = Order.objects.filter(session_id=receipt.session_id, user=request.user)
+    order_details = []
+    total_quantity = 0
+    total_cost = Decimal('0.00')
+    for order in orders:
+        line_total = order.item_price * order.quantity
+        order_details.append({
+            'item_name': order.item_name,
+            'quantity': order.quantity,
+            'unit_price': order.item_price,
+            'line_total': line_total
+        })
+        total_quantity += order.quantity
+        total_cost += line_total
+
     profile = getattr(request.user, 'profile', None)
     contact_number = profile.contactnumber if profile else 'Not Provided'
-    
+
+    reference_number = receipt.reference_number or orders.filter(reference_number__isnull=False).values_list('reference_number', flat=True).first() or receipt.session_id[:8]
+
     return render(request, 'receipt.html', {
         'receipt': receipt,
         'orders': orders,
-        'contact_number': contact_number
+        'order_details': order_details,
+        'total_quantity': total_quantity,
+        'total_cost': total_cost,
+        'contact_number': contact_number,
+        'reference_number': reference_number
     })
 
 @login_required
@@ -1326,6 +1449,7 @@ def change_email_view(request):
         form = EmailChangeForm(request.user)
     return render(request, 'change_email.html', {'form': form})
 
+@login_required
 def profile_view(request):
     # Create profile if it doesn't exist (for OAuth users)
     profile, created = UserProfile.objects.get_or_create(
@@ -1334,6 +1458,112 @@ def profile_view(request):
     )
     return render(request, 'profile.html', {
         'profile': profile
+    })
+
+@login_required
+def purchase_history_view(request):
+    """
+    Display purchase history grouped by order reference.
+    One row per order, with aggregated product information.
+    """
+    # Get unique orders for this user, grouped by reference_number or session_id
+    orders_qs = Order.objects.filter(
+        user=request.user
+    ).select_related('user').order_by('-ordered_at')
+    
+    if not orders_qs.exists():
+        from django.core.paginator import Paginator
+        return render(request, 'purchase_history.html', {
+            'page_obj': Paginator([], 10).get_page(1)
+        })
+    
+    # Group orders by session_id (one order session per purchase)
+    seen_sessions = set()
+    history_entries = []
+    
+    for order in orders_qs:
+        session_id = order.session_id
+        if session_id in seen_sessions:
+            continue  # Skip, already processed this session
+        
+        seen_sessions.add(session_id)
+        
+        # Get all items in this order session
+        session_orders = Order.objects.filter(
+            session_id=session_id,
+            user=request.user
+        ).select_related('user')
+        
+        # Build product list with quantities
+        product_items = {}
+        total_quantity = 0
+        total_cost = Decimal('0.00')
+        
+        for item in session_orders:
+            key = item.item_name
+            if key not in product_items:
+                product_items[key] = {
+                    'name': item.item_name,
+                    'quantity': 0,
+                    'price': item.item_price
+                }
+            product_items[key]['quantity'] += item.quantity
+            total_quantity += item.quantity
+            total_cost += item.item_price * item.quantity
+        
+        # Format product display
+        product_display = []
+        for item_name, item_data in product_items.items():
+            if item_data['quantity'] > 1:
+                product_display.append(f"{item_name} x{item_data['quantity']}")
+            else:
+                product_display.append(item_name)
+        
+        products_str = ', '.join(product_display[:3])
+        if len(product_display) > 3:
+            products_str += '...'
+        
+        # Get order reference (should be consistent across session)
+        reference_number = order.reference_number or session_id[:8]
+        
+        # Get receipt for this order if it exists
+        receipt = Receipt.objects.filter(
+            session_id=session_id,
+            user=request.user
+        ).first()
+        
+        # Determine payment status and amount
+        if receipt and receipt.amount_paid:
+            payment_status = 'paid' if receipt.amount_paid >= total_cost else 'partial'
+            total_paid = receipt.amount_paid
+        else:
+            payment_status = order.status
+            total_paid = order.amount_paid or Decimal('0.00')
+        
+        # Get the latest status from all orders in this session
+        latest_order = session_orders.order_by('-ordered_at').first()
+        status_display = latest_order.get_status_display() if latest_order else 'Pending'
+        
+        history_entries.append({
+            'reference_number': reference_number,
+            'session_id': session_id,
+            'products': products_str or 'No items',
+            'items': total_quantity,
+            'total_paid': total_paid if total_paid else total_cost,
+            'ordered_date': order.ordered_at,
+            'status': payment_status,
+            'status_display': status_display,
+            'receipt_id': receipt.id if receipt else None,
+            'has_payment': bool(receipt and receipt.amount_paid),
+        })
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(history_entries, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'purchase_history.html', {
+        'page_obj': page_obj
     })
 
 @login_required

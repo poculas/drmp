@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -101,7 +102,7 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField(default=1, help_text="Quantity of this item in the order")
     ordered_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    reference_number = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    reference_number = models.CharField(max_length=20, null=True, blank=True)
     payment_option = models.CharField(max_length=20, choices=PAYMENT_OPTION_CHOICES, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -112,6 +113,18 @@ class Order(models.Model):
     claimed_at = models.DateTimeField(null=True, blank=True, help_text="Date and time when order was claimed")
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='updated_orders', help_text="Staff member who last updated the order status")
 
+    def get_order_total(self):
+        """Calculate total for all items in this order (by session_id)"""
+        all_items = Order.objects.filter(session_id=self.session_id)
+        total = Decimal('0.00')
+        for item in all_items:
+            total += item.item_price * item.quantity
+        return total
+    
+    def get_order_items(self):
+        """Get all items in this order (by session_id)"""
+        return Order.objects.filter(session_id=self.session_id).select_related('user')
+    
     def __str__(self):
         return f"Order {self.id} for {self.user.username} ({self.status})"
 
@@ -158,23 +171,42 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment {self.id} for {self.user.username} ({self.status})"
 
-def generate_order_reference_number():
-    """Generate a unique order reference number in format DRMP-YYYY-XXXXXX"""
-    year = timezone.now().year
-    # Get the last reference number for this year
-    last_receipt = Receipt.objects.filter(
-        reference_number__startswith=f'DRMP-{year}-'
-    ).order_by('-id').first()
+def generate_order_reference_number(order_date=None):
+    """Generate a unique order reference number in format DRMP-YYYY-MM-DD-XXXX
     
-    if last_receipt:
-        # Extract the numeric part and increment
-        last_num = int(last_receipt.reference_number.split('-')[-1])
-        new_num = last_num + 1
-    else:
-        new_num = 1
+    Args:
+        order_date: The date to use for the reference. Defaults to today.
+    """
+    if order_date is None:
+        order_date = timezone.now().date()
     
-    # Format as DRMP-YYYY-XXXXXX (6 digits with leading zeros)
-    return f'DRMP-{year}-{new_num:06d}'
+    # Handle datetime objects
+    if hasattr(order_date, 'date'):
+        order_date = order_date.date()
+    
+    prefix = f'DRMP-{order_date:%Y-%m-%d}-'
+
+    # Get all references for this date
+    references = list(Receipt.objects.filter(
+        reference_number__startswith=prefix
+    ).values_list('reference_number', flat=True))
+    references += list(Order.objects.filter(
+        reference_number__startswith=prefix
+    ).values_list('reference_number', flat=True))
+
+    # Remove duplicates and find max number
+    references = set(ref for ref in references if ref)
+    max_num = 0
+    for ref in references:
+        try:
+            candidate = int(ref.split('-')[-1])
+            if candidate > max_num:
+                max_num = candidate
+        except (ValueError, IndexError):
+            continue
+
+    new_num = max_num + 1
+    return f'{prefix}{new_num:04d}'
 
 class UserActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')

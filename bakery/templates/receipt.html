@@ -43,6 +43,7 @@ td,th{
     <section>
         <br>
         <h1>Online Receipt</h1>
+        <p><strong>Order Reference Number:</strong> {{ reference_number }}</p>
         <table id="customerInfo">
             <tr>
                 <th colspan="2"><h2>Customer Details</h2></th>
@@ -87,26 +88,40 @@ td,th{
 <br>
         <table id="orderInfo">
             <tr>
-                <th colspan="2"><h2>Order Details</h2></th>
+                <th colspan="4"><h2>Order Details</h2></th>
             </tr>
             <tr>
                 <th>Item</th>
-                <th>Price</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
             </tr>
-            {% if orders %}
-                {% for order in orders %}
+            {% if order_details %}
+                {% for item in order_details %}
                     <tr>
-                        <td>{{ order.item_name }}</td>
-                        <td>₱{{ order.item_price }}</td>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₱{{ item.unit_price }}</td>
+                        <td>₱{{ item.line_total }}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    <td colspan="3" style="font-weight: bold; text-align: right;">Subtotal:</td>
+                    <td style="font-weight: bold;">₱{{ total_cost }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-weight: bold; text-align: right;">Amount Paid:</td>
+                    <td style="font-weight: bold;">₱{{ receipt.amount_paid }}</td>
+                </tr>
+                {% if receipt.remaining_balance and receipt.remaining_balance > 0 %}
+                    <tr>
+                        <td colspan="3" style="font-weight: bold; text-align: right;">Remaining Balance:</td>
+                        <td style="font-weight: bold;">₱{{ receipt.remaining_balance }}</td>
+                    </tr>
+                {% endif %}
             {% else %}
-                <tr><td colspan="2">No order details found.</td></tr>
+                <tr><td colspan="4">No order details found.</td></tr>
             {% endif %}
-            <tr>
-                <td><h3>Total Price: </h3></td>
-                <td>₱{{ receipt.total_price }}</td>
-            </tr>
         </table>
     </section>
 {% endblock %}

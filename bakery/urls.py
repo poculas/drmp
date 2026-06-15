@@ -19,6 +19,8 @@ urlpatterns = [
     path('webhook/paymongo/', views.paymongo_webhook_view, name='paymongo_webhook'),
     path('set-password.php', views.set_password_view, name='set_password'),
     path('profile.php', views.profile_view, name='profile'),
+    path('purchase-history.php', views.purchase_history_view, name='purchase_history'),
+    path('orders/<str:order_reference>/', views.order_detail_view, name='order_detail'),
     path('change-password.php', views.change_password_view, name='change_password'),
     path('change-email.php', views.change_email_view, name='change_email'),
     

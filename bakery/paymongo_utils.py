@@ -1,10 +1,14 @@
 import requests
 import json
 import base64
+import logging
+from decimal import Decimal
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
-from bakery.models import Payment, Receipt, Order, AuditLog, InventoryLog, Product
+from bakery.models import Payment, Receipt, Order, AuditLog, InventoryLog, Product, generate_order_reference_number
+
+logger = logging.getLogger(__name__)
 
 
 @transaction.atomic
@@ -131,7 +135,7 @@ def deduct_stock_for_orders(session_id, payment_id, user):
         }
 
 
-def create_paymongo_checkout(amount, description, user):
+def create_paymongo_checkout(amount, description, user, success_url=None, cancel_url=None, checkout_info=None):
     """
     Create a PayMongo checkout session for payment.
     
@@ -139,6 +143,9 @@ def create_paymongo_checkout(amount, description, user):
         amount (float): The amount to charge in PHP
         description (str): Description of the payment
         user: The user making the payment
+        success_url (str): URL where the user is redirected after successful payment
+        cancel_url (str): URL where the user is redirected after payment cancellation
+        checkout_info (dict): Additional checkout metadata to persist with payment
         
     Returns:
         dict: Response from PayMongo API with checkout URL
@@ -155,9 +162,12 @@ def create_paymongo_checkout(amount, description, user):
         url = f"{settings.PAYMONGO_API_URL}/checkout_sessions"
         
         # Build redirect URLs
-        base_url = getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')
-        success_url = f"{base_url}/payment-success.php"
-        failed_url = f"{base_url}/menu.php?payment=failed"
+        if not success_url:
+            base_url = getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')
+            success_url = f"{base_url}/payment-success.php"
+        if not cancel_url:
+            base_url = getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')
+            cancel_url = f"{base_url}/menu.php?payment=failed"
         
         # Get user profile information for pre-filling
         user_email = user.email
@@ -174,16 +184,28 @@ def create_paymongo_checkout(amount, description, user):
             'accept': 'application/json'
         }
         
+        # Ensure amount is a Decimal for precise centavo conversion
+        numeric_amount = Decimal(str(amount))
+        if numeric_amount <= 0:
+            return {
+                'success': False,
+                'error': 'Invalid payment amount. Amount must be greater than 0.'
+            }
+
+        paymongo_amount = int(numeric_amount * 100)
+
+        logger.info(f"PAYMONGO_CHECKOUT_INIT | user={user.id} | amount_php={numeric_amount} | amount_centavos={paymongo_amount} | description={description}")
+
         data = {
             'data': {
                 'attributes': {
-                    'amount': int(amount * 100),  # PayMongo expects amount in cents
+                    'amount': paymongo_amount,
                     'description': description,
                     'currency': 'PHP',
                     'line_items': [
                         {
                             'name': description,
-                            'amount': int(amount * 100),
+                            'amount': paymongo_amount,
                             'quantity': 1,
                             'currency': 'PHP'
                         }
@@ -191,7 +213,7 @@ def create_paymongo_checkout(amount, description, user):
                     'payment_method_types': ['gcash', 'paymaya', 'card', 'grab_pay'],
                     'send_payment_receipt': True,
                     'success_url': success_url,
-                    'cancel_url': failed_url,
+                    'cancel_url': cancel_url,
                     'customer': {
                         'email': user_email,
                         'name': user_name
@@ -208,12 +230,16 @@ def create_paymongo_checkout(amount, description, user):
             checkout_url = response_data['data']['attributes']['checkout_url']
             
             # Create payment record
+            payment_raw_response = {
+                'paymongo_response': response_data,
+                'checkout_info': checkout_info
+            }
             payment = Payment.objects.create(
                 user=user,
                 amount=amount,
                 status='pending',
                 paymongo_checkout_id=checkout_id,
-                raw_response=response_data
+                raw_response=payment_raw_response
             )
             
             return {
@@ -353,33 +379,72 @@ def process_webhook_event(payload, signature):
                     payment.save()
                     
                     # Update associated receipt and orders
+                    checkout_info = payment.raw_response.get('checkout_info') if isinstance(payment.raw_response, dict) else None
+                    session_id = None
                     if payment.receipt:
-                        payment.receipt.reference_number = generate_order_reference_number()
+                        session_id = payment.receipt.session_id
+                    elif checkout_info:
+                        session_id = checkout_info.get('session_id')
+
+                    if not payment.receipt and checkout_info and session_id:
+                        reference_number = generate_order_reference_number()
+                        receipt = Receipt.objects.create(
+                            user=payment.user,
+                            session_id=session_id,
+                            total_price=checkout_info.get('total_amount', payment.amount),
+                            full_name=checkout_info.get('full_name'),
+                            contact_number=checkout_info.get('contact_number'),
+                            reference_number=reference_number,
+                            payment_option=checkout_info.get('payment_option'),
+                            total_amount=checkout_info.get('total_amount', payment.amount),
+                            amount_paid=checkout_info.get('amount_paid', payment.amount),
+                            remaining_balance=checkout_info.get('remaining_balance', 0),
+                            pickup_availability_date=timezone.datetime.strptime(checkout_info.get('pickup_availability_date'), '%Y-%m-%d').date() if checkout_info.get('pickup_availability_date') else None
+                        )
+                        payment.receipt = receipt
+                        payment.save()
+
+                    if payment.receipt:
+                        payment.receipt.reference_number = payment.receipt.reference_number or generate_order_reference_number()
                         payment.receipt.save()
-                        
-                        # Update orders
-                        Order.objects.filter(session_id=payment.receipt.session_id).update(
+
+                        orders = Order.objects.filter(session_id=session_id, user=payment.user)
+                        orders.update(
                             reference_number=payment.receipt.reference_number,
+                            payment_option=payment.receipt.payment_option,
+                            total_amount=payment.receipt.total_amount,
+                            amount_paid=payment.receipt.amount_paid,
+                            remaining_balance=payment.receipt.remaining_balance,
+                            pickup_availability_date=payment.receipt.pickup_availability_date,
+                            contact_number=payment.receipt.contact_number,
                             status='confirmed'
                         )
-                        
-                        # Deduct stock for all ordered items
+
                         stock_deduction_result = deduct_stock_for_orders(
-                            payment.receipt.session_id,
+                            session_id,
                             payment.id,
                             payment.user
                         )
-                        
+
                         if not stock_deduction_result['success']:
-                            # Log stock deduction failure but don't fail the payment
                             AuditLog.objects.create(
                                 user=payment.user,
                                 action='stock_validation_failed',
                                 description=f"Stock deduction failed for payment {payment.id}: {stock_deduction_result.get('error', 'Unknown error')}",
                                 ip_address=None
                             )
-                    
-                    # Log payment success
+
+                        try:
+                            from bakery.views import send_order_confirmation_email
+                            send_order_confirmation_email(payment.receipt, orders)
+                        except Exception as email_exception:
+                            AuditLog.objects.create(
+                                user=payment.user,
+                                action='payment_success',
+                                description=f"Payment succeeded but order confirmation email failed: {str(email_exception)}",
+                                ip_address=None
+                            )
+
                     AuditLog.objects.create(
                         user=payment.user,
                         action='payment_success',

@@ -153,19 +153,23 @@
 
             <div class="order-details">
                 <h3>Order Summary</h3>
-                {% for order in orders %}
+                <div class="detail-row" style="font-weight:bold;">
+                    <span class="label">Product</span>
+                    <span class="value">Total</span>
+                </div>
+                {% for item in order_details %}
                     <div class="detail-row">
-                        <span class="label">{{ order.item_name }} x {{ orders|length }}</span>
-                        <span class="value">₱{{ order.item_price }}</span>
+                        <span class="label">{{ item.item_name }} x {{ item.quantity }}</span>
+                        <span class="value">₱{{ item.line_total }}</span>
                     </div>
                 {% endfor %}
                 <div class="detail-row" style="font-weight: bold; border-top: 2px solid #dee2e6; padding-top: 15px;">
-                    <span class="label">Total Packages</span>
-                    <span class="value">{{ orders|length }}</span>
+                    <span class="label">Total Quantity</span>
+                    <span class="value">{{ total_quantity }}</span>
                 </div>
                 <div class="detail-row" style="font-weight: bold;">
                     <span class="label">Total Amount</span>
-                    <span class="value">₱{{ receipt.total_amount }}</span>
+                    <span class="value">₱{{ total_cost }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Payment Type</span>
@@ -175,7 +179,7 @@
                     <span class="label">Amount Paid</span>
                     <span class="value">₱{{ receipt.amount_paid }}</span>
                 </div>
-                {% if receipt.remaining_balance > 0 %}
+                {% if receipt.remaining_balance and receipt.remaining_balance > 0 %}
                     <div class="detail-row" style="color: #dc3545;">
                         <span class="label">Remaining Balance</span>
                         <span class="value">₱{{ receipt.remaining_balance }}</span>

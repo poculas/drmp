@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Purchase History - Dough Re Mi Patisserie{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="h3 mb-1">Purchase History</h1>
+                            <p class="text-muted mb-0">Review your past orders and track order status.</p>
+                        </div>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-secondary">Back to Profile</a>
+                    </div>
+
+                    {% if page_obj.object_list %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle text-nowrap">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Order Reference</th>
+                                        <th scope="col">Products</th>
+                                        <th scope="col">Items</th>
+                                        <th scope="col">Total Paid</th>
+                                        <th scope="col">Ordered On</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in page_obj.object_list %}
+                                        <tr>
+                                            <td><strong>{{ entry.reference_number }}</strong></td>
+                                            <td>{{ entry.products }}</td>
+                                            <td>{{ entry.items }}</td>
+                                            <td>₱{{ entry.total_paid }}</td>
+                                            <td>{{ entry.ordered_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if entry.status == 'paid' %}bg-success
+                                                    {% elif entry.status == 'partial' %}bg-warning text-dark
+                                                    {% elif entry.status == 'processing' or entry.status == 'confirmed' %}bg-info text-dark
+                                                    {% elif entry.status == 'pending' %}bg-secondary
+                                                    {% elif entry.status == 'cancelled' %}bg-danger
+                                                    {% else %}bg-primary{% endif %}">
+                                                    {{ entry.status_display|capfirst }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'order_detail' entry.reference_number %}" class="btn btn-sm btn-outline-primary">View Order</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if page_obj.paginator.num_pages > 1 %}
+                            <nav aria-label="Purchase history pagination">
+                                <ul class="pagination justify-content-center mt-4">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if num == page_obj.number %}
+                                            <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h4 class="mb-3">No purchases found</h4>
+                            <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping from our menu to see your purchase history here.</p>
+                            <a href="{% url 'menu' %}" class="btn btn-primary">Browse Menu</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

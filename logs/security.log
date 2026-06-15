@@ -82,47 +82,60 @@
 2026-06-15 13:25:47,998 [WARNING] django.security.csrf - Forbidden (CSRF token from the 'X-Csrftoken' HTTP header has incorrect length.): /add-to-cart.php
 2026-06-15 13:42:11,924 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: rochelle | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
 2026-06-15 13:42:12,494 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: rochelle | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 13:47:09,066 [INFO] security - LOGOUT | User: poculas.nna@gmail.com
-2026-06-15 07:20:33,044 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: jecoleishome@gmail.com
-2026-06-15 07:23:35,055 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
-2026-06-15 07:24:01,628 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 07:25:19,737 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 07:32:41,171 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 07:33:42,888 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 07:38:17,159 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mmfardientes@tip.edu.ph
-2026-06-15 07:38:23,334 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
-2026-06-15 07:38:45,626 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 07:46:36,564 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 07:51:34,965 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mmfardientes@tip.edu.ph
-2026-06-15 07:51:58,367 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
-2026-06-15 07:52:31,644 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:01:00,695 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
-2026-06-15 08:02:19,810 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
-2026-06-15 08:03:31,394 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
-2026-06-15 08:06:09,921 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
-2026-06-15 08:06:48,611 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
-2026-06-15 08:10:37,713 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:10:52,540 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:12:35,014 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:19:52,626 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: testexample@gmail.com
-2026-06-15 08:21:45,271 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:24:52,056 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mmfardientes@tip.edu.ph
-2026-06-15 08:25:32,033 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 08:25:32,708 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 08:25:38,834 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 08:25:38,836 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 08:25:45,516 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 08:25:45,526 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mary_faith | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
-2026-06-15 08:26:15,765 [INFO] security - LOGOUT | User: mmfardientes@tip.edu.ph
-2026-06-15 08:27:34,305 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:27:42,257 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:33:46,551 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:34:20,975 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:34:26,404 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:34:35,974 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:34:46,980 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:36:16,116 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:37:02,125 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: mmfardientes@tip.edu.ph
-2026-06-15 08:37:26,617 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
-2026-06-15 08:37:36,905 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
-2026-06-15 08:42:59,447 [WARNING] security - LOGIN_RATE_LIMIT | IP: 127.0.0.1 | Attempts: 10
+2026-06-15 14:09:51,466 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 14:10:16,655 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 14:31:30,100 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejb6@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 14:34:29,342 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejb6@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 14:34:30,035 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejb6@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 14:34:49,280 [INFO] security - LOGOUT | User: bitejb6@gmail.com
+2026-06-15 14:35:15,376 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mjbbite@tip.edu.ph
+2026-06-15 14:47:59,020 [INFO] security - LOGOUT | User: mjbbite@tip.edu.ph
+2026-06-15 14:48:50,798 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 14:49:06,935 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 14:49:25,313 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejb6@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 14:49:25,423 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejb6@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 14:49:35,732 [INFO] security - LOGOUT | User: bitejb6@gmail.com
+2026-06-15 14:51:17,625 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mjbbite@tip.edu.ph
+2026-06-15 15:26:41,809 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid CAPTCHA
+2026-06-15 15:27:11,194 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mjbbite@tip.edu.ph
+2026-06-15 15:27:28,131 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mjbbite@tip.edu.ph | IP: 127.0.0.1 | Description: Attempted checkout with 3 orders today (max 3)
+2026-06-15 15:27:28,131 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mjbbite@tip.edu.ph | IP: 127.0.0.1 | Description: Attempted checkout with 3 orders today (max 3)
+2026-06-15 15:27:37,648 [INFO] security - LOGOUT | User: mjbbite@tip.edu.ph
+2026-06-15 15:28:18,826 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Form validation errors: Email is already registered.
+2026-06-15 15:28:47,928 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: bhiejeyb9@gmail.com
+2026-06-15 15:34:43,143 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bhiejeyb9@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 3 orders today (max 3)
+2026-06-15 15:34:44,935 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bhiejeyb9@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 3 orders today (max 3)
+2026-06-15 15:50:13,637 [INFO] security - LOGOUT | User: bhiejeyb9@gmail.com
+2026-06-15 15:53:28,758 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: joannamaebite@gmail.com
+2026-06-15 16:08:59,267 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: joannamaebite@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 16:08:59,948 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: joannamaebite@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 16:09:31,536 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: joannamaebite@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 16:09:32,155 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: joannamaebite@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 4 orders today (max 3)
+2026-06-15 16:09:39,804 [INFO] security - LOGOUT | User: joannamaebite@gmail.com
+2026-06-15 16:10:04,832 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mjbbite@tip.edu.ph
+2026-06-15 16:10:30,146 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mjbbite@tip.edu.ph | IP: 127.0.0.1 | Description: Attempted checkout with 3 orders today (max 3)
+2026-06-15 16:10:30,802 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: mjbbite@tip.edu.ph | IP: 127.0.0.1 | Description: Attempted checkout with 3 orders today (max 3)
+2026-06-15 16:11:26,608 [INFO] security - LOGOUT | User: mjbbite@tip.edu.ph
+2026-06-15 16:13:40,220 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: bitejaybhie@gmail.com
+2026-06-15 16:14:19,877 [INFO] security - AUDIT_LOG | Action: payment_failed | User: bitejaybhie@gmail.com | IP: N/A | Description: PayMongo checkout creation failed: [{'code': 'invalid_request_body', 'detail': 'Total amount must be between 1.00 and 999,999,999.99'}]
+2026-06-15 16:19:35,751 [ERROR] security - PICKUP_INVALID_TOTAL | user=21 | total_price=0.00 | session_id=nghglqk9ql8wnuqx4qd3kecv7b942tvn
+2026-06-15 16:19:59,349 [INFO] security - CHECKOUT_SUMMARY | user=21 | items=[{'name': 'Special Paris-Brest', 'price': '800.00', 'quantity': 3, 'subtotal': '2400.00'}, {'name': 'Strawberry Macaroons', 'price': '220.00', 'quantity': 2, 'subtotal': '440.00'}] | subtotal=2840.00 | shipping_fee=0.00 | grand_total=2840.00
+2026-06-15 16:19:59,364 [INFO] security - CHECKOUT_SUMMARY | user=21 | items=[{'name': 'Special Paris-Brest', 'price': '800.00', 'quantity': 3, 'subtotal': '2400.00'}, {'name': 'Strawberry Macaroons', 'price': '220.00', 'quantity': 2, 'subtotal': '440.00'}] | subtotal=2840.00 | shipping_fee=0.00 | grand_total=2840.00
+2026-06-15 17:11:01,569 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejaybhie@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 6 orders today (max 3)
+2026-06-15 17:11:02,197 [INFO] security - AUDIT_LOG | Action: daily_order_limit_failed | User: bitejaybhie@gmail.com | IP: 127.0.0.1 | Description: Attempted checkout with 6 orders today (max 3)
+2026-06-15 17:11:10,935 [INFO] security - LOGOUT | User: bitejaybhie@gmail.com
+2026-06-15 17:14:42,028 [WARNING] security - SIGNUP_FAILED | IP: 127.0.0.1 | Reason: Form validation errors: Phone number must be exactly 11 digits.
+2026-06-15 17:16:10,406 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: joybite2001@gmail.com
+2026-06-15 17:16:33,040 [INFO] security - CHECKOUT_SUMMARY | user=22 | reference=DRMP-2026-06-15-0008 | items=[{'name': 'Eclair', 'price': '450.00', 'quantity': 1, 'subtotal': '450.00'}, {'name': 'Flavored Croissant', 'price': '380.00', 'quantity': 1, 'subtotal': '380.00'}] | subtotal=830.00 | shipping_fee=0.00 | grand_total=830.00
+2026-06-15 17:49:32,712 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: joybite2001@gmail.com
+2026-06-15 18:01:37,665 [INFO] security - CHECKOUT_SUMMARY | user=22 | reference=DRMP-2026-06-15-0009 | items=[{'name': 'Flavored Croissant', 'price': '380.00', 'quantity': 1, 'subtotal': '380.00'}] | subtotal=380.00 | shipping_fee=0.00 | grand_total=380.00
+2026-06-15 18:01:37,877 [ERROR] security - CHECKOUT_ZERO_TOTAL | user=22 | subtotal=0.00 | shipping_fee=0.00
+2026-06-15 18:03:02,685 [INFO] security - LOGOUT | User: joybite2001@gmail.com
+2026-06-15 18:04:31,240 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 18:05:04,823 [INFO] security - CHECKOUT_SUMMARY | user=23 | reference=DRMP-2026-06-15-0010 | items=[{'name': 'Classic Croissant', 'price': '315.00', 'quantity': 1, 'subtotal': '315.00'}] | subtotal=315.00 | shipping_fee=0.00 | grand_total=315.00
+2026-06-15 18:05:04,881 [INFO] security - CHECKOUT_SUMMARY | user=23 | reference=DRMP-2026-06-15-0010 | items=[{'name': 'Classic Croissant', 'price': '315.00', 'quantity': 1, 'subtotal': '315.00'}] | subtotal=315.00 | shipping_fee=0.00 | grand_total=315.00
+2026-06-15 18:07:51,785 [INFO] security - MFA_TOGGLED | User: bitejb6@gmail.com | Enabled: True
+2026-06-15 18:07:55,412 [INFO] security - LOGOUT | User: bitejb6@gmail.com
+2026-06-15 18:08:23,592 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: bitejb6@gmail.com
+2026-06-15 18:08:38,158 [WARNING] security - MFA_VERIFY_FAILED | IP: 127.0.0.1 | User: bitejb6@gmail.com | Reason: Incorrect code submitted
+2026-06-15 18:08:55,730 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: bitejb6@gmail.com

@@ -37,7 +37,7 @@
                     {% endif %}
                     
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> Profile</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}"> Profile</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Log out</a></li>
                         {% if user.profile.role == 'customer' %}
                             <li class="nav-item text-white ms-2" style="font-size: 0.9rem;">Welcome, {{ user.first_name }} {{ user.last_name }}</li>
