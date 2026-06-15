@@ -33,7 +33,7 @@ if os.getenv('RENDER'):
 
 # CSRF Cookie Settings
 CSRF_COOKIE_SECURE = not DEBUG  # Secure cookies in production
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Site ID required by django-allauth

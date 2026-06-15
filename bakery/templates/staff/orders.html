@@ -1,8 +1,8 @@
 {% extends 'staff/base.html' %}
 {% load static %}
-{% csrf_token %}
 
 {% block staff_content %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <h1 class="mb-4">Orders</h1>
     
     {% if messages %}
@@ -150,71 +150,66 @@
 
 {% block extra_js %}
 <script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+    function getCSRFToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     }
-    return cookieValue;
-}
 
-function switchTab(tabName) {
-    window.location.href = `?tab=${tabName}`;
-}
+    function switchTab(tabName) {
+        window.location.href = `?tab=${tabName}`;
+    }
 
-function moveToProcessing(orderId) {
-    const csrfToken = getCookie('csrftoken');
-    
-    fetch(`/staff/orders/${orderId}/move-to-processing/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Failed to update order status: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to update order status');
-    });
-}
+    function moveToProcessing(orderId) {
+        fetch(`/staff/orders/${orderId}/move-to-processing/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to update order status: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update order status: ' + error.message);
+        });
+    }
 
-function moveToClaimed(orderId) {
-    const csrfToken = getCookie('csrftoken');
-    
-    fetch(`/staff/orders/${orderId}/move-to-claimed/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Failed to update order status: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to update order status');
-    });
-}
+    function moveToClaimed(orderId) {
+        fetch(`/staff/orders/${orderId}/move-to-claimed/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to update order status: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update order status: ' + error.message);
+        });
+    }
 </script>
 {% endblock %}
