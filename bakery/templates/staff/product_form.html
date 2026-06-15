@@ -29,8 +29,12 @@
                 <small style="color: #666; font-size: 0.85rem;">Maximum file size: 3MB</small>
                 {% if product and product.image %}
                     <div class="mt-2">
-                        <small>Current image:</small><br>
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px; margin-top: 5px;">
+                        <small>Current image: <strong>{{ product.image.name }}</strong></small>
+                        {% comment %}
+                            We show the filename only, not the actual image preview,
+                            because Render's ephemeral filesystem means the file
+                            may no longer exist on disk after a redeploy.
+                        {% endcomment %}
                     </div>
                 {% endif %}
             </div>
@@ -56,7 +60,7 @@
     
     {% if form.errors %}
     <div class="alert alert-danger mt-3">
-        {% for field in form %}
+        {% for field in forms %}
             {% for error in field.errors %}
                 <p>{{ error }}</p>
             {% endfor %}

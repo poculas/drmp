@@ -979,11 +979,15 @@ def staff_product_create(request):
 @staff_required
 def staff_product_edit(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            edited_product = form.save(commit=False)
+            # If no new image uploaded, keep the existing image name in DB
+            if 'image' not in request.FILES:
+                edited_product.image = product.image
+            edited_product.save()
             AuditLog.objects.create(
                 user=request.user,
                 action='product_edit',
@@ -995,7 +999,7 @@ def staff_product_edit(request, product_id):
             return redirect('staff_products')
     else:
         form = ProductForm(instance=product)
-    
+
     return render(request, 'staff/product_form.html', {
         'form': form,
         'title': 'Edit Product',

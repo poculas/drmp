@@ -2,8 +2,21 @@ import re
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-
+from django.forms.widgets import FileInput
+from .models import Product
 from bakery.models import UserProfile, Product, Order
+
+class SafeImageInput(FileInput):
+    """
+    A FileInput widget that never checks if the existing file exists on disk.
+    Necessary for Render's ephemeral filesystem where uploaded files
+    are wiped on redeploy but database references remain.
+    """
+    def is_initial(self, value):
+        return False
+
+    def format_value(self, value):
+        return None
 
 class SignUpForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50, required=True, label="First Name")
@@ -195,7 +208,7 @@ class ProductForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'image': SafeImageInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
             'is_available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -203,7 +216,6 @@ class ProductForm(forms.ModelForm):
 
     def clean_image(self):
         image = self.cleaned_data.get('image')
-        # Only validate size if a new file was actually uploaded
         if image and hasattr(image, 'size') and hasattr(image, 'read'):
             if image.size > 3 * 1024 * 1024:
                 raise ValidationError("Image file size must be no more than 3MB.")
