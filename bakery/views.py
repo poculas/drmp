@@ -200,7 +200,7 @@ def signup_view(request):
             user.username = form.cleaned_data['email']  # Use email as username
             user.save()
             
-            UserProfile.objects.get_or_create(
+            UserProfile.objects.update_or_create(
                 user=user,
                 defaults={
                     'contactnumber': form.cleaned_data['contactnumber'],
@@ -312,7 +312,10 @@ def login_view(request):
                     return redirect('verify_mfa')
             except UserProfile.DoesNotExist:
                 # Create profile if it doesn't exist
-                UserProfile.objects.create(user=user, contactnumber='')
+                UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'contactnumber': '', 'role': 'customer'}
+                )
             
             # No 2FA or profile doesn't exist, log in normally
             auth_login(request, user)
