@@ -19,6 +19,8 @@ services:
         value: .onrender.com
       - key: CSRF_TRUSTED_ORIGINS
         value: https://.onrender.com
+      - key: BASE_URL
+        value: https://drmp-vd7d.onrender.com
 
 databases:
   - name: dough-re-mi-db

@@ -156,8 +156,8 @@ def create_paymongo_checkout(amount, description, user):
         
         # Build redirect URLs
         base_url = getattr(settings, 'BASE_URL', 'http://127.0.0.1:8000')
-        success_url = f"{base_url}/payment-success/"
-        failed_url = f"{base_url}/menu/?payment=failed"
+        success_url = f"{base_url}/payment-success.php"
+        failed_url = f"{base_url}/menu.php?payment=failed"
         
         # Get user profile information for pre-filling
         user_email = user.email

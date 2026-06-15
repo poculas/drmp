@@ -13,6 +13,7 @@ urlpatterns = [
     path('pickup.php', views.pickup_view, name='pickup'),
     path('delivery.php', views.pickup_view, name='delivery'),
     path('payment-success.php', views.payment_success_view, name='payment_success'),
+    path('payment-success/', views.payment_success_view, name='payment_success_no_ext'),
     path('order-success.php', views.order_success_view, name='order_success'),
     path('receipt.php', views.receipt_view, name='receipt'),
     path('webhook/paymongo/', views.paymongo_webhook_view, name='paymongo_webhook'),

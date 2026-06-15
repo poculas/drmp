@@ -656,7 +656,21 @@ def pickup_view(request):
         messages.error(request, "No active order to bill.")
         return redirect('menu')
     
+    # Group orders by item name and sum quantities
     orders = Order.objects.filter(session_id=session_id, user=request.user)
+    grouped_orders = {}
+    for order in orders:
+        if order.item_name in grouped_orders:
+            grouped_orders[order.item_name]['quantity'] += order.quantity
+        else:
+            grouped_orders[order.item_name] = {
+                'item_name': order.item_name,
+                'item_price': order.item_price,
+                'quantity': order.quantity
+            }
+    
+    # Convert grouped orders back to a list for template rendering
+    orders_list = list(grouped_orders.values())
         
     if request.method == 'POST':
         form = PickupForm(request.POST, user=request.user)
@@ -706,7 +720,7 @@ def pickup_view(request):
                 return render(request, 'pickup.html', {
                     'form': form,
                     'total_price': total_price,
-                    'orders': orders
+                    'orders': orders_list
                 })
         else:
             messages.error(request, "Invalid form data. Please verify all inputs.")
@@ -716,7 +730,7 @@ def pickup_view(request):
     return render(request, 'pickup.html', {
         'form': form,
         'total_price': total_price,
-        'orders': orders
+        'orders': orders_list
     })
 
 @login_required

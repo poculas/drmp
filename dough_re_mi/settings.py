@@ -100,7 +100,7 @@ WSGI_APPLICATION = 'dough_re_mi.wsgi.application'
 # Database configuration - use PostgreSQL via DATABASE_URL on Render, SQLite for local development
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL", "sqlite:///db.sqlite3"),
+        default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -166,8 +166,8 @@ LOGOUT_REDIRECT_URL = 'index'
 # Session Expiry (Elevation of Privilege Mitigation)
 SESSION_COOKIE_AGE = 1800  # 30 minutes (in seconds)
 SESSION_SAVE_EVERY_REQUEST = True  # Refresh session expiry on every request (inactivity timeout)
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Clear session when browser is closed
-SESSION_COOKIE_SECURE = not DEBUG  # Secure cookies in production
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Don't clear session when browser is closed (for OAuth users)
+SESSION_COOKIE_SECURE = False  # Allow non-secure cookies for local development
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 

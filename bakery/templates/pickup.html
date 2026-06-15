@@ -182,12 +182,12 @@
                 <h3>Order Summary</h3>
                 {% for order in orders %}
                     <div class="order-item">
-                        <span>{{ order.item_name }} x {{ order.quantity|default:1 }}</span>
-                        <span>₱{{ order.item_price }}</span>
+                        <span>{{ order.item_name }} x {{ order.quantity }}</span>
+                        <span>₱{{ order.item_price|floatformat:2 }}</span>
                     </div>
                 {% endfor %}
                 <div class="order-item" style="font-weight: bold; border-top: 2px solid #dee2e6; padding-top: 10px;">
-                    <span>Total Packages: {{ orders|length }}</span>
+                    <span>Total Items: {{ orders|length }}</span>
                     <span>Grand Total: ₱{{ total_price }}</span>
                 </div>
             </div>

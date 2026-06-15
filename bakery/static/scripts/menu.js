@@ -4,15 +4,21 @@ var cart = [];
 // Primary: window.CSRF_TOKEN injected by the Django template
 // Fallback: read Django's csrftoken cookie (Django docs recommended approach)
 function getCsrfToken() {
-    if (window.CSRF_TOKEN) return window.CSRF_TOKEN;
+    if (window.CSRF_TOKEN) {
+        console.log('Using CSRF_TOKEN from window:', window.CSRF_TOKEN);
+        return window.CSRF_TOKEN;
+    }
     var name = 'csrftoken';
     var cookies = document.cookie.split(';');
     for (var i = 0; i < cookies.length; i++) {
         var c = cookies[i].trim();
         if (c.indexOf(name + '=') === 0) {
-            return decodeURIComponent(c.substring(name.length + 1));
+            var token = decodeURIComponent(c.substring(name.length + 1));
+            console.log('Using CSRF_TOKEN from cookie:', token);
+            return token;
         }
     }
+    console.log('No CSRF token found');
     return '';
 }
 
@@ -62,7 +68,7 @@ function addToCart(name, price, quantity, event) {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify(item)
     })
@@ -111,7 +117,7 @@ function removeFromCart(index) {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({ index: index, action: 'remove' })
     })
@@ -132,7 +138,7 @@ function incrementCartItem(index) {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({ index: index, action: 'increment' })
     })
@@ -156,7 +162,7 @@ function decrementCartItem(index) {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({ index: index, action: 'decrement' })
     })
@@ -272,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': getCsrfToken()
                     },
                     body: JSON.stringify({ cart: cart, totalPrice: cart.reduce((sum, item) => sum + (item.item_price * item.quantity), 0) })
                 })

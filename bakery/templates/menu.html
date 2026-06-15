@@ -151,7 +151,7 @@
     window.CSRF_TOKEN = '{{ csrf_token }}';
     window.isUserLoggedIn = {{ user.is_authenticated|lower }};
 </script>
-<script src="{% static 'scripts/menu.js' %}"></script>
+<script src="{% static 'scripts/menu.js' %}?v=2"></script>
 <script>
     function increment(inputId) {
         const quantityInput = document.getElementById(inputId);
