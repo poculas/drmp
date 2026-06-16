@@ -3575,3 +3575,105 @@ Traceback (most recent call last):
   File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
     raise NoReverseMatch(msg)
 django.urls.exceptions.NoReverseMatch: Reverse for 'verify_admin_totp' not found. 'verify_admin_totp' is not a valid view function or pattern name.
+2026-06-16 11:57:33,979 [ERROR] django.request - Internal Server Error: /login.php
+Traceback (most recent call last):
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.errors.NotNullViolation: null value in column "attempts" of relation "bakery_mfacode" violates not-null constraint
+DETAIL:  Failing row contains (36, 082841, email, 2026-06-16 03:57:33.217683+00, 2026-06-16 03:59:33.217003+00, f, 40, null, null).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Joy\Desktop\drmp\drmp\bakery\views.py", line 343, in login_view
+    create_mfa_code(user)
+    ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\bakery\views.py", line 118, in create_mfa_code
+    mfa_obj = MFACode.objects.create(
+        user=user,
+    ...<2 lines>...
+        expires_at=expires_at
+    )
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\query.py", line 660, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\base.py", line 814, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\base.py", line 877, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\base.py", line 1020, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\base.py", line 1061, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\query.py", line 1810, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\backends\utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\backends\utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\backends\utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.IntegrityError: null value in column "attempts" of relation "bakery_mfacode" violates not-null constraint
+DETAIL:  Failing row contains (36, 082841, email, 2026-06-16 03:57:33.217683+00, 2026-06-16 03:59:33.217003+00, f, 40, null, null).
+
+2026-06-16 12:01:10,439 [ERROR] django.request - Internal Server Error: /admin/totp/verify/
+Traceback (most recent call last):
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Joy\Desktop\drmp\drmp\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Joy\Desktop\drmp\drmp\bakery\views.py", line 1855, in verify_admin_totp
+    import pyotp
+ModuleNotFoundError: No module named 'pyotp'

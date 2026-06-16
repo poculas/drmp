@@ -166,3 +166,9 @@
 2026-06-16 11:27:09,342 [INFO] security - CHECKOUT_SUMMARY | user=39 | reference=DRMP-2026-06-16-0001 | items=[{'name': 'Flavored Croissant', 'price': '380.00', 'quantity': 2, 'subtotal': '760.00'}] | subtotal=760.00 | shipping_fee=0.00 | grand_total=760.00
 2026-06-16 11:28:33,306 [INFO] security - AUDIT_LOG | Action: order_status_update | User: mrasalucop01@tip.edu.ph | IP: 127.0.0.1 | Description: Moved order 102 from pending to Processing
 2026-06-16 11:28:48,535 [INFO] security - AUDIT_LOG | Action: order_status_update | User: mrasalucop01@tip.edu.ph | IP: 127.0.0.1 | Description: Moved order 102 from processing to Claimed
+2026-06-16 11:53:28,502 [INFO] security - LOGOUT | User: mrasalucop01@tip.edu.ph
+2026-06-16 11:53:56,615 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
+2026-06-16 11:57:08,548 [INFO] security - LOGOUT | User: mrasalucop01@tip.edu.ph
+2026-06-16 11:59:18,155 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
+2026-06-16 11:59:50,322 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
+2026-06-16 12:02:22,371 [INFO] security - ADMIN_TOTP_VERIFY_SUCCESS | IP: 127.0.0.1 | User: 

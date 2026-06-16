@@ -119,7 +119,9 @@ def create_mfa_code(user):
         user=user,
         code=code,
         method='email',
-        expires_at=expires_at
+        expires_at=expires_at,
+        attempts=0,
+        verified_at=None
     )
     
     send_mfa_code_via_email(user, code)
@@ -338,8 +340,8 @@ def login_view(request):
                 # Reset failed attempts on successful authentication
                 profile.reset_failed_attempts()
                 
-                # Check if user has email 2FA enabled
-                if profile.mfa_email_enabled:
+                # Staff should always use MFA; other users use it when enabled
+                if profile.role == 'staff' or profile.mfa_email_enabled:
                     create_mfa_code(user)
                     request.session['mfa_user_id'] = user.id
                     request.session['mfa_method'] = 'email'

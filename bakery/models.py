@@ -52,6 +52,8 @@ class MFACode(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_verified = models.BooleanField(default=False)
+    attempts = models.IntegerField(default=0)
+    verified_at = models.DateTimeField(null=True, blank=True)
 
     def is_expired(self):
         return timezone.now() > self.expires_at
