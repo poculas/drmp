@@ -271,6 +271,21 @@ def signup_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
+        # Check if user needs to set password
+        needs_password = False
+        
+        # OAuth users without usable password
+        if not request.user.has_usable_password():
+            needs_password = True
+        
+        # Staff accounts that haven't set their own password yet
+        elif hasattr(request.user, 'profile') and request.user.profile.role == 'staff':
+            if not request.user.profile.has_set_password:
+                needs_password = True
+        
+        if needs_password:
+            return redirect('set_password')
+        
         # Redirect based on role, but check if this is a redirect from @login_required
         # If there's a 'next' parameter, it means user was trying to access a protected page
         next_url = request.GET.get('next')
@@ -359,6 +374,21 @@ def login_view(request):
             auth_login(request, user)
             messages.success(request, "Login successful!")
             logger.info(f"LOGIN_SUCCESS | IP: {client_ip} | User: {user.email}")
+            
+            # Check if user needs to set password
+            needs_password = False
+            
+            # OAuth users without usable password
+            if not user.has_usable_password():
+                needs_password = True
+            
+            # Staff accounts that haven't set their own password yet
+            elif hasattr(user, 'profile') and user.profile.role == 'staff':
+                if not user.profile.has_set_password:
+                    needs_password = True
+            
+            if needs_password:
+                return redirect('set_password')
             
             # Redirect based on role
             if user.is_superuser:
@@ -1100,7 +1130,22 @@ def set_password_view(request):
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.user)
+            
+            # Mark staff as having set their password
+            if hasattr(request.user, 'profile') and request.user.profile.role == 'staff':
+                request.user.profile.has_set_password = True
+                request.user.profile.save()
+            
             messages.success(request, "Password set successfully! You can now log in using your email and password.")
+            
+            # Redirect based on role after setting password
+            if request.user.is_superuser:
+                return redirect('/admin/')
+            elif hasattr(request.user, 'profile'):
+                if request.user.profile.role == 'staff':
+                    return redirect('staff_dashboard')
+                elif request.user.profile.role == 'customer':
+                    return redirect('index')
             return redirect('index')
     else:
         form = SetPasswordForm(request.user)

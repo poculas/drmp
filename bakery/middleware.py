@@ -6,11 +6,24 @@ class RequirePasswordMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated and not request.user.has_usable_password():
-            # Allow access to set password page, logout, static/admin, and cart API endpoints
-            allowed_paths = ['/set-password', '/logout', '/admin/', '/static/', '/media/', '/add-to-cart.php', '/remove-from-cart.php', '/update-cart-quantity.php', '/get-cart.php', '/checkout.php']
-            if not any(request.path.startswith(path) for path in allowed_paths):
-                return redirect('set_password')
+        if request.user.is_authenticated:
+            # Check if user needs to set password
+            needs_password = False
+            
+            # OAuth users without usable password
+            if not request.user.has_usable_password():
+                needs_password = True
+            
+            # Staff accounts that haven't set their own password yet
+            elif hasattr(request.user, 'profile') and request.user.profile.role == 'staff':
+                if not request.user.profile.has_set_password:
+                    needs_password = True
+            
+            if needs_password:
+                # Allow access to set password page, logout, static/admin, and cart API endpoints
+                allowed_paths = ['/set-password', '/logout', '/admin/', '/static/', '/media/', '/add-to-cart.php', '/remove-from-cart.php', '/update-cart-quantity.php', '/get-cart.php', '/checkout.php']
+                if not any(request.path.startswith(path) for path in allowed_paths):
+                    return redirect('set_password')
 
         response = self.get_response(request)
         return response
@@ -31,7 +44,7 @@ class RoleBasedRedirectMiddleware:
             if 'next' in request.GET:
                 response = self.get_response(request)
                 return response
-
+            
             if request.user.is_superuser:
                 return redirect('/admin/')
             elif hasattr(request.user, 'profile'):

@@ -3677,3 +3677,12 @@ Traceback (most recent call last):
   File "C:\Users\Joy\Desktop\drmp\drmp\bakery\views.py", line 1855, in verify_admin_totp
     import pyotp
 ModuleNotFoundError: No module named 'pyotp'
+2026-06-16 12:21:45,424 [ERROR] django.request - Internal Server Error: /admin/totp/verify/
+Traceback (most recent call last):
+  File "C:\Users\USER\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\USER\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\USER\Desktop\DRMP\Dough-Re-Mi-Patisserie\bakery\views.py", line 1900, in verify_admin_totp
+    import pyotp
+ModuleNotFoundError: No module named 'pyotp'

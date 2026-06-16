@@ -20,6 +20,7 @@ class UserProfile(models.Model):
     mfa_email_enabled = models.BooleanField(default=False)
     failed_login_attempts = models.IntegerField(default=0)
     lockout_until = models.DateTimeField(null=True, blank=True)
+    has_set_password = models.BooleanField(default=False, help_text="Whether user has set their own password (for staff accounts)")
 
     def __str__(self):
         return f"Profile for {self.user.username} ({self.role})"

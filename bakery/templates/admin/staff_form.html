@@ -20,6 +20,9 @@
                     <label for="{{ form.password.id_for_label }}" style="display: block; margin-bottom: 5px;"><h4>{{ form.password.label }}</h4></label>
                     {{ form.password }}
                 </div>
+                <p style="font-size: 14px; color: #666; margin-top: -10px;">
+                    <em>Provide a temporary password. The staff member will be required to set their own password upon first login.</em>
+                </p>
                 {% endif %}
                 {% if form.first_name %}
                 <div>

@@ -146,7 +146,7 @@ class PickupForm(forms.Form):
 
 class StaffCreateForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email Address")
-    password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Password")
+    password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Temporary Password")
 
     class Meta:
         model = User
@@ -166,7 +166,7 @@ class StaffCreateForm(forms.ModelForm):
             user.save()
             UserProfile.objects.get_or_create(
                 user=user,
-                defaults={'role': 'staff', 'is_active': True}
+                defaults={'role': 'staff', 'is_active': True, 'has_set_password': False}
             )
         return user
 
