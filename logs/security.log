@@ -181,3 +181,6 @@
 2026-06-16 12:29:49,174 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
 2026-06-16 12:30:05,507 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
 2026-06-16 12:30:42,913 [INFO] security - LOGOUT | User: mrasalucop01@tip.edu.ph
+2026-06-16 12:51:22,737 [INFO] security - ADMIN_TOTP_VERIFY_SUCCESS | IP: 127.0.0.1 | User: 
+2026-06-16 12:54:00,019 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
+2026-06-16 12:54:51,002 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
