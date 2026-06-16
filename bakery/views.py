@@ -813,6 +813,17 @@ def pickup_view(request):
                 'pickup_availability_date': pickup_availability_date.strftime('%Y-%m-%d')
             }
             
+            # Update Order records with contact and payment information immediately
+            # This ensures data is available in staff dashboard even before payment completion
+            Order.objects.filter(session_id=session_id, user=request.user).update(
+                contact_number=form.cleaned_data['contact_number'],
+                payment_option=payment_option,
+                total_amount=total_amount,
+                amount_paid=amount_paid,
+                remaining_balance=remaining_balance,
+                pickup_availability_date=pickup_availability_date
+            )
+            
             # Create PayMongo checkout session using the current host / port
             success_url = request.build_absolute_uri(reverse('payment_success'))
             cancel_url = request.build_absolute_uri(reverse('menu'))
