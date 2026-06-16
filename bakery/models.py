@@ -52,12 +52,23 @@ class MFACode(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_verified = models.BooleanField(default=False)
-    
+
     def is_expired(self):
         return timezone.now() > self.expires_at
-    
+
     def __str__(self):
         return f"MFA Code for {self.user.username} ({self.method})"
+
+class TOTPSecret(models.Model):
+    """Stores TOTP secrets for admin users"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='totp_secret')
+    secret = models.CharField(max_length=32, unique=True)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    backup_codes = models.JSONField(default=list, blank=True)
+
+    def __str__(self):
+        return f"TOTP for {self.user.username}"
 
 class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)

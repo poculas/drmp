@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Disable TOTP - Admin{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Disable Two-Factor Authentication (TOTP)</h1>
+
+    <div style="max-width: 600px; margin: 30px 0;">
+        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin-bottom: 30px;">
+            <strong>⚠️ Warning:</strong> Disabling TOTP will reduce the security of your admin account. You will no longer need to enter a code when logging into the admin panel.
+        </div>
+
+        <p>Are you sure you want to disable TOTP for your account?</p>
+
+        <form method="post" style="margin-top: 30px;">
+            {% csrf_token %}
+            <button type="submit" class="button delete" style="padding: 10px 20px; margin-right: 10px;">Yes, Disable TOTP</button>
+            <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px;">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

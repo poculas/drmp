@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Verify TOTP - Admin Login{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Two-Factor Authentication Verification</h1>
+
+    <div style="max-width: 400px; margin: 50px auto;">
+        <p style="text-align: center; margin-bottom: 30px;">
+            Enter the 6-digit code from your authenticator app to proceed.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom: 20px;">
+                <label for="code">Verification Code:</label>
+                <input type="text" id="code" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="000000"
+                       style="padding: 10px; font-size: 20px; text-align: center; letter-spacing: 5px; width: 100%; box-sizing: border-box;"
+                       inputmode="numeric" autofocus required>
+                <small style="display: block; margin-top: 5px; color: #666;">Enter the code from your authenticator app (Google Authenticator, Microsoft Authenticator, Authy, etc.)</small>
+            </div>
+
+            <button type="submit" class="button default" style="width: 100%; padding: 12px; font-size: 16px;">Verify TOTP Code</button>
+        </form>
+
+        <div style="background: #f0f0f0; border-radius: 4px; padding: 15px; margin-top: 20px; text-align: center;">
+            <small>If you no longer have access to your authenticator app, contact your administrator.</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

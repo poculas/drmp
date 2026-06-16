@@ -31,7 +31,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.template.loader import render_to_string
 
-from bakery.models import Product, CartItem, Order, Receipt, UserProfile, AuditLog, Payment, generate_order_reference_number, MFACode
+from bakery.models import Product, CartItem, Order, Receipt, UserProfile, AuditLog, Payment, generate_order_reference_number, MFACode, TOTPSecret
 from bakery.order_views import order_detail_view
 from bakery.forms import SignUpForm, DeliveryForm, PickupForm, StaffCreateForm, StaffEditForm, ProductForm, OrderStatusForm, EmailChangeForm
 from bakery.paymongo_utils import create_paymongo_checkout, verify_paymongo_payment, deduct_stock_for_orders, process_webhook_event
@@ -1758,3 +1758,144 @@ def verify_mfa(request):
         'mfa_method': mfa_method,
         'user_email': user.email
     })
+
+# ============================================================================
+# Admin TOTP Views
+# ============================================================================
+
+@admin_required
+def admin_totp_setup(request):
+    """Setup TOTP for admin user"""
+    import pyotp
+    import qrcode
+    import io
+    import base64
+
+    try:
+        totp_secret = request.user.totp_secret
+    except:
+        totp_secret = None
+
+    if totp_secret and totp_secret.is_verified:
+        messages.info(request, "TOTP is already enabled for your account.")
+        return redirect('admin:index')
+
+    if request.method == 'POST':
+        code = request.POST.get('code', '').strip()
+
+        if not code:
+            messages.error(request, "Please enter a verification code.")
+            return redirect('admin_totp_setup')
+
+        # Generate new secret if not exists
+        if not totp_secret:
+            secret = pyotp.random_base32()
+            from bakery.models import TOTPSecret
+            totp_secret = TOTPSecret.objects.create(user=request.user, secret=secret)
+
+        # Verify the code
+        totp = pyotp.TOTP(totp_secret.secret)
+        if totp.verify(code):
+            totp_secret.is_verified = True
+            totp_secret.save()
+            messages.success(request, "TOTP has been successfully enabled for your account.")
+            logger.info(f"ADMIN_TOTP_ENABLED | User: {request.user.email}")
+            return redirect('admin:index')
+        else:
+            messages.error(request, "Invalid verification code. Please try again.")
+            return redirect('admin:admin_totp_setup')
+
+    # Generate new secret and QR code
+    if not totp_secret:
+        secret = pyotp.random_base32()
+        from bakery.models import TOTPSecret
+        totp_secret = TOTPSecret.objects.create(user=request.user, secret=secret)
+
+    totp = pyotp.TOTP(totp_secret.secret)
+    qr_uri = totp.provisioning_uri(
+        name=request.user.email,
+        issuer_name='Dough Re Mi Patisserie Admin'
+    )
+
+    # Generate QR code
+    qr = qrcode.QRCode()
+    qr.add_data(qr_uri)
+    qr.make()
+    img = qr.make_image()
+
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    return render(request, 'admin/totp_setup.html', {
+        'qr_code': qr_code_base64,
+        'secret': totp_secret.secret,
+        'user_email': request.user.email
+    })
+
+@admin_required
+def admin_totp_disable(request):
+    """Disable TOTP for admin user"""
+    if request.method == 'POST':
+        try:
+            totp_secret = request.user.totp_secret
+            totp_secret.delete()
+            messages.success(request, "TOTP has been disabled for your account.")
+            logger.info(f"ADMIN_TOTP_DISABLED | User: {request.user.email}")
+        except:
+            pass
+        return redirect('admin:index')
+
+    return render(request, 'admin/totp_disable_confirm.html')
+
+def verify_admin_totp(request):
+    """Verify TOTP for admin login"""
+    import pyotp
+
+    totp_user_id = request.session.get('totp_user_id')
+
+    if not totp_user_id:
+        messages.error(request, "Invalid TOTP session. Please login again.")
+        return redirect('admin:login')
+
+    user = get_object_or_404(User, id=totp_user_id)
+
+    if request.method == 'POST':
+        code = request.POST.get('code', '').strip()
+        client_ip = get_client_ip(request)
+
+        # Rate limiting
+        totp_attempts_key = f'totp_attempts_{totp_user_id}'
+        attempts = cache.get(totp_attempts_key, 0)
+
+        if attempts >= 5:
+            del request.session['totp_user_id']
+            messages.error(request, "Too many failed TOTP attempts. Please login again.")
+            logger.warning(f"ADMIN_TOTP_LOCKOUT | IP: {client_ip} | User: {user.email}")
+            return redirect('admin:login')
+
+        try:
+            totp_secret = user.totp_secret
+            if not totp_secret.is_verified:
+                messages.error(request, "TOTP is not enabled for this account.")
+                return redirect('admin:login')
+
+            totp = pyotp.TOTP(totp_secret.secret)
+            if totp.verify(code):
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                request.session['admin_totp_verified'] = True
+                del request.session['totp_user_id']
+                cache.delete(totp_attempts_key)
+                logger.info(f"ADMIN_TOTP_VERIFY_SUCCESS | IP: {client_ip} | User: {user.email}")
+                return redirect('admin:index')
+            else:
+                attempts += 1
+                cache.set(totp_attempts_key, attempts, 600)
+                remaining = 5 - attempts
+                messages.error(request, f"Invalid TOTP code. {remaining} attempts remaining.")
+                logger.warning(f"ADMIN_TOTP_VERIFY_FAILED | IP: {client_ip} | User: {user.email}")
+        except:
+            messages.error(request, "TOTP is not enabled for this account.")
+            return redirect('admin:login')
+
+    return render(request, 'admin/verify_totp.html', {'user_email': user.email})

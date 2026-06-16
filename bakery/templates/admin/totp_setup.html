@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Setup TOTP - Two-Factor Authentication{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Setup Two-Factor Authentication (TOTP)</h1>
+
+    <div style="max-width: 600px; margin: 30px 0;">
+        <p>Enhance your account security by enabling TOTP (Time-based One-Time Password). Follow these steps:</p>
+
+        <h2 style="margin-top: 30px;">Step 1: Scan QR Code</h2>
+        <p>Use an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy to scan this QR code:</p>
+        <div style="background: white; padding: 20px; text-align: center; border: 1px solid #ddd;">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width: 250px; height: 250px;">
+        </div>
+
+        <h2 style="margin-top: 30px;">Step 2: Manual Entry (if needed)</h2>
+        <p>If you can't scan the QR code, enter this secret key manually in your authenticator app:</p>
+        <div style="background: #f5f5f5; padding: 15px; border: 1px solid #ddd; word-break: break-all; font-family: monospace; font-size: 14px;">
+            {{ secret }}
+        </div>
+
+        <h2 style="margin-top: 30px;">Step 3: Verify Setup</h2>
+        <p>Enter the 6-digit code from your authenticator app:</p>
+
+        <form method="post" style="margin-top: 20px;">
+            {% csrf_token %}
+            <div style="margin-bottom: 20px;">
+                <label for="code">Verification Code:</label>
+                <input type="text" id="code" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="000000"
+                       style="padding: 8px; font-size: 18px; text-align: center; letter-spacing: 5px; width: 150px;"
+                       inputmode="numeric" required>
+                <small style="display: block; margin-top: 5px; color: #666;">Enter the 6-digit code from your authenticator app</small>
+            </div>
+
+            <button type="submit" class="button default" style="padding: 10px 20px; margin-right: 10px;">Verify & Enable TOTP</button>
+            <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 20px;">Cancel</a>
+        </form>
+
+        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin-top: 30px;">
+            <strong>⚠️ Important:</strong> Save your secret key in a safe place. You'll need it if you lose access to your authenticator app.
+        </div>
+    </div>
+</div>
+{% endblock %}

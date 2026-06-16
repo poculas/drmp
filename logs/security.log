@@ -156,6 +156,8 @@
 2026-06-15 22:30:21,875 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: poculas.nna@gmail.com
 2026-06-15 22:30:34,870 [INFO] security - MFA_VERIFY_SUCCESS | IP: 127.0.0.1 | User: poculas.nna@gmail.com
 2026-06-15 22:31:06,259 [INFO] security - CHECKOUT_SUMMARY | user=37 | reference=DRMP-2026-06-15-0012 | items=[{'name': 'Strawberry Macaroons', 'price': '220.00', 'quantity': 1, 'subtotal': '220.00'}] | subtotal=220.00 | shipping_fee=0.00 | grand_total=220.00
+2026-06-16 03:31:43,099 [INFO] security - ADMIN_TOTP_ENABLED | User:
+2026-06-16 03:34:09,734 [INFO] security - ADMIN_TOTP_VERIFY_SUCCESS | IP: 127.0.0.1 | User:
 2026-06-16 11:07:36,428 [INFO] security - LOGIN_SUCCESS | IP: 127.0.0.1 | User: mrasalucop01@tip.edu.ph
 2026-06-16 11:09:20,846 [WARNING] security - LOGIN_FAILED | IP: 127.0.0.1 | Reason: Invalid credentials | Email: poculas.nna@gmail.com
 2026-06-16 11:09:43,472 [INFO] security - LOGIN_MFA_CHALLENGE | IP: 127.0.0.1 | User: poculas.nna@gmail.com

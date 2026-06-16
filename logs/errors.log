@@ -3533,3 +3533,45 @@ Traceback (most recent call last):
 django.db.utils.IntegrityError: duplicate key value violates unique constraint "bakery_userprofile_user_id_key"
 DETAIL:  Key (user_id)=(23) already exists.
 
+2026-06-16 03:31:32,405 [ERROR] django.request - Internal Server Error: /admin/totp/setup/
+Traceback (most recent call last):
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/Users/maryardientes/drmp/drmp/bakery/decorators.py", line 38, in wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/maryardientes/drmp/drmp/bakery/views.py", line 1795, in admin_totp_setup
+    return redirect('admin_totp_setup')
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 48, in redirect
+    return redirect_class(resolve_url(to, *args, **kwargs))
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 145, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_totp_setup' not found. 'admin_totp_setup' is not a valid view function or pattern name.
+2026-06-16 03:32:04,355 [ERROR] django.request - Internal Server Error: /admin/login/
+Traceback (most recent call last):
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/maryardientes/drmp/drmp/bakery/admin.py", line 40, in login
+    return redirect('verify_admin_totp')
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 48, in redirect
+    return redirect_class(resolve_url(to, *args, **kwargs))
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 145, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/maryardientes/Library/Python/3.9/lib/python/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'verify_admin_totp' not found. 'verify_admin_totp' is not a valid view function or pattern name.

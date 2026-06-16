@@ -73,6 +73,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'bakery.middleware.RequirePasswordMiddleware',
     'bakery.middleware.RoleBasedRedirectMiddleware',
+    'bakery.middleware.AdminTOTPMiddleware',
 ]
 
 ROOT_URLCONF = 'dough_re_mi.urls'
